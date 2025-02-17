@@ -1,14 +1,6 @@
-// ElementSelectionPanel
 import SwiftUI
 
-/// A list of available elements to drag onto the canvas.
-let availableElements: [Element] = [
-    Element(symbol: "H", name: "Hydrogen"),
-    Element(symbol: "O", name: "Oxygen"),
-    Element(symbol: "Na", name: "Sodium"),
-    Element(symbol: "Cl", name: "Chlorine")
-]
-
+// ElementSelectionPanel
 struct ElementSelectionPanel: View {
     @EnvironmentObject var viewModel: WorkspaceViewModel
     
@@ -20,31 +12,34 @@ struct ElementSelectionPanel: View {
     
     var body: some View {
         VStack(spacing: 16) {
-            ForEach(availableElements) { element in
+            // Use the dynamic list from the view model.
+            ForEach(viewModel.availableElements) { element in
                 elementBubble(element)
             }
             Spacer()
         }
         .padding()
+        // Light orange background for the panel.
+        .background(Color(red: 1.0, green: 0.9, blue: 0.8))
     }
     
     private func elementBubble(_ element: Element) -> some View {
         ZStack {
             Circle()
-                .fill(Color.blue)
-                .frame(width: 50, height: 50)
+                .fill(element.color)
+                .frame(width: 70, height: 70) // Increased bubble size
             Text(element.symbol)
                 .font(.headline)
                 .foregroundColor(.white)
         }
         .shadow(radius: 2)
-        .gesture(  // ✅ Corrected: Using `.gesture(...)` instead of `.dragGesture(...)`
+        .gesture(
             DragGesture(coordinateSpace: .named("CanvasSpace"))
                 .onChanged { value in
                     if draggingElement == nil {
                         draggingElement = element
                         
-                        // If guided learning is on, show possible reactions
+                        // If guided learning is on, show possible reactions.
                         if viewModel.guidedLearningMode {
                             let possibleProducts: [Compound] = viewModel.possibleReactionsStartingWith(element)
                             print("Hints for \(element.symbol): \(possibleProducts.map { $0.formula })")

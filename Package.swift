@@ -8,20 +8,20 @@ import PackageDescription
 import AppleProductTypes
 
 let package = Package(
-    name: "chem2",
+    name: "Interactive Chemistry",
     platforms: [
         .iOS("16.0")
     ],
     products: [
         .iOSApplication(
-            name: "chem2",
+            name: "Interactive Chemistry",
             targets: ["AppModule"],
             bundleIdentifier: "aryan.chem2",
             teamIdentifier: "C5A4Q7BH32",
             displayVersion: "1.0",
             bundleVersion: "1",
-            appIcon: .placeholder(icon: .earth),
-            accentColor: .presetColor(.teal),
+            appIcon: .asset("AppIcon"),
+            accentColor: .presetColor(.orange),
             supportedDeviceFamilies: [
                 .pad,
                 .phone

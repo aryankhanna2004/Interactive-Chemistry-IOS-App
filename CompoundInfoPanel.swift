@@ -1,4 +1,3 @@
-//CompoundInfoPanel
 import SwiftUI
 
 /// A floating panel that shows details for a newly formed compound.
@@ -6,15 +5,22 @@ struct CompoundInfoPanel: View {
     let compound: Compound
     let dismissAction: () -> Void
     
+    // Track vertical drag offset.
+    @State private var dragOffset: CGSize = .zero
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
                 Text("Compound Info")
                     .font(.headline)
                 Spacer()
+                // Larger tap area for dismiss button.
                 Button(action: dismissAction) {
                     Image(systemName: "xmark.circle.fill")
+                        .resizable()
+                        .frame(width: 30, height: 30)
                         .foregroundColor(.gray)
+                        .accessibilityLabel("Dismiss")
                 }
             }
             
@@ -40,6 +46,28 @@ struct CompoundInfoPanel: View {
                 .fill(Color.white.opacity(0.95))
         )
         .shadow(radius: 4)
+        // Offset the panel based on drag gesture.
+        .offset(y: dragOffset.height)
+        .gesture(
+            DragGesture()
+                .onChanged { value in
+                    // Allow only downward drag.
+                    if value.translation.height > 0 {
+                        dragOffset = value.translation
+                    }
+                }
+                .onEnded { _ in
+                    // If dragged down far enough, dismiss the panel.
+                    if dragOffset.height > 100 {
+                        dismissAction()
+                    } else {
+                        // Otherwise, animate back to original position.
+                        withAnimation(.spring()) {
+                            dragOffset = .zero
+                        }
+                    }
+                }
+        )
+        .accessibilityElement(children: .contain)
     }
 }
-

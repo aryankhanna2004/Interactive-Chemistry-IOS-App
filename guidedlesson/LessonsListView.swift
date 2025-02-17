@@ -223,7 +223,9 @@ struct GenericLessonView: View {
             
             VStack(spacing: 10) {
                 ForEach(lesson.quizOptions, id: \.self) { option in
-                    QuizOption(option: option, selectedOption: $selectedAnswer)
+                    QuizOption(option: option,
+                               correctOption: lesson.correctAnswer,
+                               selectedOption: $selectedAnswer)
                 }
             }
             
@@ -272,8 +274,7 @@ struct GenericLessonView: View {
                         }
                         .padding(.horizontal, 16)
                         .padding(.vertical, 10)
-                        // Removed the .frame(maxWidth: .infinity) to make the button smaller
-                        .background(Color.blue)
+                        .background(Color(red: 0.8, green: 0.5, blue: 0.1))
                         .foregroundColor(.white)
                         .cornerRadius(12)
                         .shadow(radius: 5)
@@ -290,6 +291,7 @@ struct GenericLessonView: View {
 
 struct QuizOption: View {
     let option: String
+    let correctOption: String  // Used to determine correctness
     @Binding var selectedOption: String?
     
     var body: some View {
@@ -301,14 +303,20 @@ struct QuizOption: View {
                 .bold()
                 .padding()
                 .frame(maxWidth: .infinity)
-                // Use dark green for selected, ensuring white text for contrast
                 .foregroundColor(selectedOption == option ? .white : .primary)
-                .background(selectedOption == option
-                            ? Color(red: 0.0, green: 0.5, blue: 0.0)  // Dark green
-                            : Color.gray.opacity(0.3))
+                .background(buttonBackground)
                 .cornerRadius(12)
                 .accessibilityLabel("Answer option: \(option)")
         }
         .padding(.horizontal, 10)
+    }
+    
+    private var buttonBackground: Color {
+        if selectedOption == option {
+            // If the selected option is correct, use dark green; otherwise, red.
+            return option == correctOption ? Color(red: 0.0, green: 0.5, blue: 0.0) : Color.red
+        } else {
+            return Color.gray.opacity(0.3)
+        }
     }
 }

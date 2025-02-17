@@ -1,187 +1,229 @@
-//
-//  GuidedLessons.swift
-//  chem2
-//
-//  Created by ET Loaner on 2/16/25.
-//
-
+// MARK: - Lessons List View
 import SwiftUI
 
 struct LessonsListView: View {
     @EnvironmentObject var viewModel: WorkspaceViewModel
     
-    // Our curated list of lessons
     private var lessonModules: [LessonModule] {
         [
             LessonModule(
                 title: "Salt Reaction Lesson",
-                description: "Sodium (Na) and Chlorine (Cl) combine to form table salt (NaCl).",
+                description: "Sodium and Chlorine form salt (NaCl).",
+                emoji: "🧂",
                 bodyText: """
                 Welcome to the Salt Reaction Lesson!
 
-                In this lesson, you will learn how sodium (Na) reacts with chlorine (Cl) to form salt (NaCl).
+                In this lesson, you will learn how sodium (Na) reacts with chlorine (Cl) to form table salt (NaCl). Discover the rich history of salt, its industrial uses, and why it was once a prized commodity.
                 """,
                 reactionEquation: "Na + Cl → NaCl",
                 backgroundInformation: [
-                    "**About Sodium (Na):**",
-                    "Sodium is a soft, silvery-white metal that is highly reactive. It readily loses one electron during reactions.",
-                    "**About Chlorine (Cl):**",
-                    "Chlorine is a yellow-green gas known for its reactivity. It gains an electron to form a chloride ion."
+                    "Sodium (Na) is a soft, silvery-white metal known for its reactivity. It loses an electron easily, making it highly reactive with nonmetals.",
+                    "Chlorine (Cl) is a yellow-green gas that readily gains an electron to form chloride ions. Its reactivity makes it useful in various chemical processes.",
+                    "Historical Note: Salt was so valuable in ancient times that it was used as currency and for trade."
                 ],
                 detailHeader: "Compound Details",
                 detailParagraphs: [
                     "Formula: NaCl",
-                    "Common Uses: Food seasoning, preservation.",
-                    "Fun Fact: Salt was once so valuable it was used as currency!"
+                    "Common Uses: Food seasoning, preservation, and industrial applications.",
+                    "Fun Fact: The word 'salary' originates from the Latin word for salt, reflecting its historic value."
                 ],
                 quizQuestion: "Which two elements combine to form salt?",
                 quizOptions: ["Na and Cl", "H and O", "O and Cl"],
                 correctAnswer: "Na and Cl",
                 guidedLessonTitle: "Salt Reaction",
-                guidedLessonHint: "Try dragging Sodium (Na) and Chlorine (Cl) together to form Salt (NaCl)."
+                guidedLessonHint: "Drag Sodium (Na) and Chlorine (Cl) together in the lab to form salt (NaCl).",
+                guidedEmoji: "🧂"
             ),
-            
             LessonModule(
                 title: "Water Reaction Lesson",
-                description: "Form water (H₂O) from Hydrogen and Oxygen!",
+                description: "Hydrogen and Oxygen form water (H₂O).",
+                emoji: "💧",
                 bodyText: """
-                Water is one of the most important compounds for life. 
-                In this lesson, we see how Hydrogen (H) and Oxygen (O) combine to form water (H₂O).
+                Water is essential for all known forms of life. In this lesson, explore how hydrogen (H) and oxygen (O) combine to form water (H₂O). Learn about water's unique properties, its role as a universal solvent, and its significance in nature.
                 """,
                 reactionEquation: "2H + O → H₂O",
                 backgroundInformation: [
-                    "Hydrogen (H) is the lightest element, often found in diatomic form (H₂).",
-                    "Oxygen (O) is a critical gas for life on Earth, typically found as O₂."
+                    "Hydrogen (H) is the lightest element in the periodic table, often found in its diatomic form (H₂).",
+                    "Oxygen (O) is critical for respiration and is typically present as O₂ in the atmosphere.",
+                    "Water's polarity makes it an excellent solvent for a wide range of substances, influencing countless biological and chemical processes."
                 ],
                 detailHeader: "Properties of Water",
                 detailParagraphs: [
                     "Formula: H₂O",
-                    "Common Uses: Universal solvent, essential for life.",
-                    "Fun Fact: About 60% of the human body is water!"
+                    "Key Uses: Drinking, agriculture, industry, and countless biological functions.",
+                    "Fun Fact: Approximately 60% of the human body is made up of water."
                 ],
                 quizQuestion: "What is the chemical formula for water?",
                 quizOptions: ["H₂O", "CO₂", "NaCl"],
                 correctAnswer: "H₂O",
                 guidedLessonTitle: "Water Reaction",
-                guidedLessonHint: "Try dragging Hydrogen (H) and Oxygen (O) together to form Water (H₂O)."
+                guidedLessonHint: "Drag Hydrogen (H) and Oxygen (O) together to form water (H₂O).",
+                guidedEmoji: "💧"
             ),
-            
             LessonModule(
                 title: "Oxygen Gas Lesson",
-                description: "Discover how atomic O forms O₂ gas.",
+                description: "Learn how atomic oxygen forms O₂ gas.",
+                emoji: "🌬️",
                 bodyText: """
-                Oxygen gas (O₂) is essential for respiration. 
-                This lesson introduces how atomic oxygen combines to form diatomic oxygen.
+                Oxygen gas (O₂) is vital for respiration and combustion. In this lesson, understand how individual oxygen atoms combine to form diatomic oxygen. Delve into its properties, importance in Earth's atmosphere, and industrial applications.
                 """,
                 reactionEquation: "2O → O₂",
                 backgroundInformation: [
                     "Oxygen is the third most abundant element in the universe by mass.",
-                    "Earth’s atmosphere is about 21% oxygen."
+                    "On Earth, oxygen gas constitutes about 21% of the atmosphere and is crucial for the survival of most organisms.",
+                    "Industrial Uses: Oxygen is used in steel-making, welding, and medical applications."
                 ],
                 detailHeader: "Properties of O₂",
                 detailParagraphs: [
                     "Formula: O₂",
-                    "Uses: Essential for breathing, steel-making, etc.",
-                    "Fun Fact: O₂ has a pale blue color in liquid form."
+                    "Visual Note: Liquid oxygen has a pale blue color.",
+                    "Fun Fact: Despite being a colorless gas, liquid oxygen is distinctly blue."
                 ],
                 quizQuestion: "Which formula represents oxygen gas?",
                 quizOptions: ["O", "O₂", "O₃"],
                 correctAnswer: "O₂",
-                guidedLessonTitle: nil,
-                guidedLessonHint: nil
+                guidedLessonTitle: "Oxygen Gas Formation",
+                guidedLessonHint: "Combine two oxygen atoms to see oxygen gas (O₂) form.",
+                guidedEmoji: "🌬️"
             ),
-            
             LessonModule(
                 title: "Hydrogen Gas Lesson",
-                description: "See how atomic Hydrogen forms H₂ gas.",
+                description: "Hydrogen atoms combine to form diatomic hydrogen (H₂).",
+                emoji: "⚡",
                 bodyText: """
-                Hydrogen is the simplest element, with just one proton and one electron. 
-                Learn how two hydrogen atoms combine to form dihydrogen (H₂).
+                Hydrogen is the simplest and most abundant element in the universe. This lesson demonstrates how two hydrogen atoms combine to form diatomic hydrogen (H₂), and explores its properties, applications in energy, and its role in the cosmos.
                 """,
                 reactionEquation: "2H → H₂",
                 backgroundInformation: [
-                    "Hydrogen is the most abundant element in the universe.",
-                    "It can be used in fuel cells and rocket propulsion."
+                    "Hydrogen (H) has one proton and one electron, making it the simplest atom.",
+                    "Diatomic hydrogen (H₂) is used as a fuel in various energy applications, including fuel cells.",
+                    "Cosmic Significance: Hydrogen is the primary building block for stars and galaxies."
                 ],
                 detailHeader: "Properties of H₂",
                 detailParagraphs: [
                     "Formula: H₂",
-                    "Lightest known gas",
-                    "Fun Fact: Hydrogen makes up about 75% of the baryonic mass of the universe."
+                    "Characteristic: It is the lightest and most abundant gas in the universe.",
+                    "Fun Fact: Hydrogen gas is nearly invisible but can be detected by its distinct sound when ignited."
                 ],
-                quizQuestion: "How many H atoms are needed to form H₂?",
+                quizQuestion: "How many hydrogen atoms are needed to form diatomic hydrogen (H₂)?",
                 quizOptions: ["1", "2", "3"],
                 correctAnswer: "2",
-                guidedLessonTitle: nil,
-                guidedLessonHint: nil
+                guidedLessonTitle: "Hydrogen Gas Formation",
+                guidedLessonHint: "Drag two hydrogen atoms together to form H₂.",
+                guidedEmoji: "⚡"
             ),
-            
             LessonModule(
                 title: "Hydroxyl Radical Lesson (OH)",
-                description: "Explore how Hydrogen and Oxygen can form the OH radical.",
+                description: "Discover the reactivity of the hydroxyl radical (OH).",
+                emoji: "🔥",
                 bodyText: """
-                The hydroxyl radical (OH) is a highly reactive species found in many chemical processes.
+                The hydroxyl radical (OH) is a highly reactive molecule that plays a key role in atmospheric chemistry. In this lesson, learn how a hydrogen atom and an oxygen atom can form the hydroxyl radical, its role in breaking down pollutants, and its transient nature.
                 """,
                 reactionEquation: "H + O → OH",
                 backgroundInformation: [
-                    "The OH radical is crucial in atmospheric chemistry for removing pollutants.",
-                    "It’s often called the “detergent” of the atmosphere."
+                    "OH is known as the 'detergent' of the atmosphere due to its ability to react with many pollutants.",
+                    "It is extremely reactive and short-lived under normal conditions.",
+                    "Scientific Insight: The presence of OH is crucial for maintaining the balance of various atmospheric chemicals."
                 ],
-                detailHeader: "OH Properties",
+                detailHeader: "Properties of OH",
                 detailParagraphs: [
                     "Formula: OH",
-                    "Extremely reactive intermediate.",
-                    "Short-lived under normal conditions."
+                    "Role: Initiates the breakdown of pollutants and organic compounds in the atmosphere.",
+                    "Fun Fact: Despite its high reactivity, OH radicals are present in only trace amounts in the air."
                 ],
                 quizQuestion: "Which elements combine to create the hydroxyl radical?",
                 quizOptions: ["H and Cl", "Na and O", "H and O"],
                 correctAnswer: "H and O",
-                guidedLessonTitle: nil,
-                guidedLessonHint: nil
+                guidedLessonTitle: "Hydroxyl Radical Formation",
+                guidedLessonHint: "Drag a hydrogen atom and an oxygen atom together to form OH.",
+                guidedEmoji: "🔥"
             ),
-            
             LessonModule(
                 title: "Salt + Hydroxyl Lesson",
-                description: "Experiment with NaCl (salt) and OH in the lab.",
+                description: "Explore a reaction between salt (NaCl) and the hydroxyl radical (OH).",
+                emoji: "🔬",
                 bodyText: """
-                This lesson discusses a hypothetical reaction between salt (NaCl) and the hydroxyl radical (OH). 
-                In real chemistry, there might be multiple steps or byproducts, but here we’ll illustrate a simplified reaction.
+                In this lesson, we explore a simplified model of a reaction between salt (NaCl) and the hydroxyl radical (OH). Although real-world chemistry may be more complex, this demonstration shows how different reactants can yield multiple products, highlighting the dynamic nature of chemical reactions.
                 """,
                 reactionEquation: "NaCl + OH → NaOH + Cl",
                 backgroundInformation: [
-                    "NaOH (sodium hydroxide) is also called lye.",
-                    "Chlorine (Cl) can be freed in some reactions, but real chemistry may require complex steps."
+                    "NaCl (salt) is a familiar compound used in everyday life for seasoning and preservation.",
+                    "The hydroxyl radical (OH) can interact with salt under specific conditions to produce sodium hydroxide (NaOH) and chlorine (Cl).",
+                    "This reaction is presented as a simplified model for educational purposes."
                 ],
                 detailHeader: "Possible Products",
                 detailParagraphs: [
-                    "NaOH is a strong base used in many industrial processes.",
-                    "Chlorine can be re-used or react further."
+                    "Simplified Reaction: NaCl + OH → NaOH + Cl",
+                    "Sodium Hydroxide (NaOH): Widely used in industry for cleaning and soap making.",
+                    "Chlorine (Cl): Can be a reactive intermediate in further chemical processes."
                 ],
-                quizQuestion: "Which product might form from NaCl + OH in a simplified model?",
+                quizQuestion: "Which product might form from NaCl + OH in this model?",
                 quizOptions: ["NaOH + Cl", "NaOH + HCl", "H₂O", "Unknown"],
                 correctAnswer: "NaOH + Cl",
-                guidedLessonTitle: nil,
-                guidedLessonHint: nil
+                guidedLessonTitle: "Salt + Hydroxyl Reaction",
+                guidedLessonHint: "Drag salt (NaCl) and hydroxyl (OH) together to observe the reaction.",
+                guidedEmoji: "🔬"
             )
         ]
     }
     
     var body: some View {
-        NavigationStack {
-            List(lessonModules) { module in
-                NavigationLink(destination: GenericLessonView(lesson: module)
-                    .environmentObject(viewModel)) {
-                    
-                    VStack(alignment: .leading) {
-                        Text(module.title)
-                            .font(.headline)
-                        Text(module.description)
-                            .font(.subheadline)
-                            .foregroundColor(.secondary)
+            NavigationStack {
+                ScrollView {
+                    LazyVStack(spacing: 16) {
+                        ForEach(lessonModules) { module in
+                            NavigationLink(destination: GenericLessonView(lesson: module)
+                                            .environmentObject(viewModel)) {
+                                LessonRow(module: module)
+                            }
+                        }
                     }
+                    .padding()
                 }
+                .navigationTitle("Lessons")
+                .background(Color(.systemGroupedBackground))
             }
-            .navigationTitle("Lessons")
         }
     }
-}
+
+    // MARK: - LessonRow Subview
+
+    struct LessonRow: View {
+        let module: LessonModule
+        
+        var body: some View {
+            HStack {
+                Text(module.guidedEmoji ?? "")
+                    .font(.system(size: 40))
+                    .padding()
+                
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(module.title)
+                        .font(.headline)
+                        .bold()
+                        .foregroundColor(.primary)
+                    Text(module.description)
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                }
+                Spacer()
+                Image(systemName: "chevron.right")
+                    .foregroundColor(.gray)
+                    .padding()
+            }
+            .padding()
+            .background(
+                RoundedRectangle(cornerRadius: 15)
+                    .fill(LinearGradient(
+                        gradient: Gradient(colors: [Color.orange.opacity(0.2), Color.pink.opacity(0.2)]),
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    ))
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 15)
+                    .stroke(Color.orange, lineWidth: 1)
+            )
+            .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
+        }
+    }

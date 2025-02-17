@@ -1,48 +1,44 @@
 // CanvasView
 import SwiftUI
 
-/// A draggable bubble representing a single placed element on the canvas.
-/// It updates the model’s position as the user drags it.
 struct PlacedElementView: View {
     @Binding var placedElement: PlacedElement
-    let dragEnded: () -> Void
+    let dragEnded: (CGPoint) -> Void
     
     var body: some View {
         Text(placedElement.element.symbol)
             .font(.headline)
             .foregroundColor(.white)
-            .frame(width: 50, height: 50)
-            .background(Color.blue)
-            .cornerRadius(25)
+            .frame(width: 70, height: 70)
+            .background(placedElement.element.color) // Use the element’s color
+            .cornerRadius(35)
             .shadow(radius: 2)
             .position(placedElement.position)
             .gesture(
                 DragGesture()
                     .onChanged { value in
-                        // Update position in the data model
                         placedElement.position = value.location
                     }
-                    .onEnded { _ in
-                        // Once dragging finishes, check for reactions or do other logic
-                        dragEnded()
+                    .onEnded { value in
+                        if value.location.x < 120 {
+                            placedElement.position.x = 130
+                        }
+                        
+                        // 2) Then check trash or reactions
+                        dragEnded(placedElement.position)
                     }
             )
+
+        
     }
 }
 
-
-
-/// A draggable bubble representing a compound.
-/// Single tap shows info; double tap breaks the compound.
-
-/// A draggable bubble representing a placed compound (the product of a reaction).
-/// - Single tap => show info
-/// - Double tap => break the compound back into elements
 struct PlacedCompoundView: View {
     @Binding var placedCompound: PlacedCompound
     let breakAction: () -> Void
     let infoAction: () -> Void
-
+    let dragEnded: (CGPoint) -> Void
+    
     var body: some View {
         VStack(spacing: 2) {
             Text(placedCompound.compound.formula)
@@ -52,16 +48,18 @@ struct PlacedCompoundView: View {
                 .font(.caption2)
                 .foregroundColor(.white)
         }
-        .frame(width: 60, height: 60)
+        .frame(width: 80, height: 80)
         .background(Color.purple)
-        .cornerRadius(30)
+        .cornerRadius(35)
         .shadow(radius: 2)
         .position(placedCompound.position)
         .gesture(
             DragGesture()
                 .onChanged { value in
-                    // Update position in the data model
                     placedCompound.position = value.location
+                }
+                .onEnded { value in
+                    dragEnded(value.location)
                 }
         )
         .onTapGesture {
@@ -75,8 +73,6 @@ struct PlacedCompoundView: View {
     }
 }
 
-
-
 /// The main workspace canvas where elements and compounds are displayed.
 
 
@@ -84,32 +80,62 @@ struct CanvasView: View {
     @EnvironmentObject var viewModel: WorkspaceViewModel
     
     var body: some View {
-        ZStack {
-            // Elements
-            // We use $viewModel.placedElements so that each element is a Binding<PlacedElement>.
-            ForEach($viewModel.placedElements) { $placedElement in
-                PlacedElementView(placedElement: $placedElement) {
-                    // When the user finishes dragging an element, check for new reactions
-                    viewModel.checkForReactions()
+        GeometryReader { geometry in
+            ZStack {
+                // Elements
+                ForEach($viewModel.placedElements) { $placedElement in
+                    PlacedElementView(placedElement: $placedElement,
+                                      dragEnded: { finalPos in
+                        // Check if dropped on trash
+                        let trashRect = CGRect(x: geometry.size.width - 70,
+                                               y: geometry.size.height - 70,
+                                               width: 50,
+                                               height: 50)
+                        if trashRect.contains(finalPos) {
+                            // Remove this element from the workspace
+                            viewModel.placedElements.removeAll { $0.id == placedElement.id }
+                        } else {
+                            // Otherwise, do your normal reaction check
+                            viewModel.checkForReactions()
+                        }
+                    })
                 }
-            }
-            
-            // Compounds
-            // Similarly, we pass each placedCompound as a binding to PlacedCompoundView.
-            ForEach($viewModel.placedCompounds) { $placedCompound in
-                PlacedCompoundView(
-                    placedCompound: $placedCompound,
-                    breakAction: {
-                        // Double-tap breaks the compound
+                
+                // Compounds
+                ForEach($viewModel.placedCompounds) { $placedCompound in
+                    PlacedCompoundView(placedCompound: $placedCompound,
+                                       breakAction: {
                         viewModel.breakCompound(placedCompound)
                     },
-                    infoAction: {
-                        // Single-tap shows info
+                                       infoAction: {
                         viewModel.selectCompound(placedCompound.compound)
-                    }
-                )
+                    },
+                                       dragEnded: { finalPos in
+                        let trashRect = CGRect(x: geometry.size.width - 70,
+                                               y: geometry.size.height - 70,
+                                               width: 50,
+                                               height: 50)
+                        if trashRect.contains(finalPos) {
+                            // Remove this compound
+                            viewModel.placedCompounds.removeAll { $0.id == placedCompound.id }
+                        } else {
+                            // Normal reaction check
+                            viewModel.checkForReactions()
+                        }
+                    })
+                }
+                
+                // Place trash icon
+                Image(systemName: "trash")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 40, height: 40)
+                    .foregroundColor(.red)
+                    .position(x: geometry.size.width - 40,
+                              y: geometry.size.height - 40)
             }
+            .coordinateSpace(name: "CanvasSpace")
+            .background(Color(red: 0.95, green: 0.97, blue: 1.0))
         }
-        .coordinateSpace(name: "CanvasSpace")
     }
 }
