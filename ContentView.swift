@@ -1,43 +1,40 @@
 import SwiftUI
+import AudioToolbox
+import UIKit
 
 struct ContentView: View {
     @EnvironmentObject var viewModel: WorkspaceViewModel
     let guidedLearningMode: Bool
 
-    @Environment(\.dismiss) var dismiss
-    
     @State private var draggingElement: Element? = nil
     @State private var dragPosition: CGPoint = .zero
-    
-    /// Controls whether we show the hint "snackbar."
     @State private var showLessonHint = false
+
+    // Only the final 100% overlay will be handled here.
+    @State private var showCompletionOverlay = false
+    @State private var overlayProgress: Double = 0
+    @State private var overlayNextStep: String? = nil
 
     var body: some View {
         ZStack {
-            // Main layout: Canvas + Element side panel
+            // Main lab layout: Canvas and ElementSelectionPanel.
             HStack(spacing: 0) {
-                // Canvas View with a playful pastel background.
                 CanvasView()
                     .environmentObject(viewModel)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .background(Color(red: 0.95, green: 0.97, blue: 1.0)) // Light pastel blue
+                    .background(Color(red: 0.95, green: 0.97, blue: 1.0))
                     .cornerRadius(12)
                     .accessibilityElement(children: .contain)
                     .accessibilityLabel("Canvas for placing elements")
-                
-                // Element selection panel with a light orange background.
-                ElementSelectionPanel(
-                    draggingElement: $draggingElement,
-                    dragPosition: $dragPosition
-                )
-                .environmentObject(viewModel)
-                .frame(width: 120)
-                .accessibilityElement(children: .contain)
-                .accessibilityLabel("Element selection panel. Drag an element to the canvas")
+                ElementSelectionPanel(draggingElement: $draggingElement, dragPosition: $dragPosition)
+                    .environmentObject(viewModel)
+                    .frame(width: 120)
+                    .accessibilityElement(children: .contain)
+                    .accessibilityLabel("Element selection panel. Drag an element to the canvas")
             }
             .coordinateSpace(name: "CanvasSpace")
             
-            // Ghost bubble while dragging an element.
+            // Ghost bubble while dragging.
             if let element = draggingElement {
                 Text(element.symbol)
                     .font(.headline)
@@ -51,18 +48,25 @@ struct ContentView: View {
                     .accessibilityHidden(true)
             }
             
-            // "New Discovery" overlay.
+            // Discovery overlay.
             if let newlyFound = viewModel.newlyDiscoveredCompound {
                 NewDiscoveryOverlay(compound: newlyFound) {
                     withAnimation(.easeInOut(duration: 0.5)) {
                         viewModel.newlyDiscoveredCompound = nil
+                        // After closing discovery overlay, if guided mode and quiz completed, trigger final overlay.
+                        if guidedLearningMode && viewModel.guidedPlaygroundCompleted {
+                            print("ContentView: Discovery dismissed -> guidedPlaygroundCompleted already true")
+                            overlayProgress = 100
+                            overlayNextStep = nil
+                            showCompletionOverlay = true
+                        }
                     }
                 }
                 .accessibilityElement(children: .contain)
                 .accessibilityLabel("New compound discovered: \(newlyFound.commonName)")
             }
             
-            // Floating Info Panel.
+            // Info panel.
             if viewModel.showInfoPanel, let infoCompound = viewModel.infoPanelCompound {
                 CompoundInfoPanel(compound: infoCompound) {
                     withAnimation(.easeInOut(duration: 0.5)) {
@@ -79,7 +83,7 @@ struct ContentView: View {
                 .accessibilityAddTraits(.isModal)
             }
             
-            // "Snackbar"-style hint at bottom-left.
+            // Hint overlay.
             if showLessonHint, let lesson = viewModel.currentGuidedLesson {
                 VStack {
                     Spacer()
@@ -92,12 +96,12 @@ struct ContentView: View {
                                 .font(.subheadline)
                         }
                         .padding()
-                        .background(Color.yellow.opacity(0.9))
+                        .background(.orange.opacity(0.5))
+                        .foregroundColor(.black)
                         .cornerRadius(8)
                         .shadow(radius: 4)
                         .accessibilityElement(children: .combine)
                         .accessibilityLabel("Hint: \(lesson.hint)")
-                        
                         Spacer()
                     }
                     .padding(.bottom, 20)
@@ -105,44 +109,22 @@ struct ContentView: View {
                 }
                 .accessibilityElement(children: .contain)
             }
-        }
-        .navigationBarBackButtonHidden(true)
-        .toolbar {
-            // Left side: Custom Back + "Guided Lesson"
-            ToolbarItem(placement: .navigationBarLeading) {
-                HStack {
-                    // Custom back button with light orange background.
-                    Button(action: {
-                        dismiss()
-                    }) {
-                        HStack {
-                            Image(systemName: "chevron.left")
-                            Text("Back")
-                                .fontWeight(.bold)
-                        }
-                        .font(.headline)
-                        .foregroundColor(.white)
-                        .padding(8)
-                        .background(
-                            RoundedRectangle(cornerRadius: 12)
-                                .fill(Color(red: 0.8, green: 0.5, blue: 0.1))
-                        )
-                    }
-                    .accessibilityLabel("Back")
-                    .accessibilityHint("Returns to the previous screen")
-                    
-                    // Guided Lesson Title.
-                    if guidedLearningMode, let lesson = viewModel.currentGuidedLesson {
-                        Text("Guided Lesson: \(lesson.title)")
-                            .font(.headline)
-                            .padding(.leading, 8)
-                            .accessibilityLabel("Guided Lesson: \(lesson.title)")
+            
+            // Final guided completion overlay (100%).
+            if guidedLearningMode && showCompletionOverlay {
+                LessonProgressOverlay(
+                    lessonName: viewModel.currentGuidedLessonModule?.title ?? "Lesson",
+                    currentProgress: overlayProgress,
+                    nextStep: overlayNextStep
+                ) {
+                    withAnimation {
+                        showCompletionOverlay = false
                     }
                 }
-                .accessibilityElement(children: .contain)
             }
-            
-            // Right side: Small "Show/Hide Hint" button.
+        }
+        .toolbar {
+            // Only a trailing toolbar item; no back button.
             ToolbarItem(placement: .navigationBarTrailing) {
                 if guidedLearningMode, viewModel.currentGuidedLesson != nil {
                     Button(action: {
@@ -152,11 +134,8 @@ struct ContentView: View {
                             .font(.system(size: 14, weight: .semibold))
                             .padding(.vertical, 6)
                             .padding(.horizontal, 10)
-                            .background(
-                                Capsule()
-                                    .fill(Color(red: 0.95, green: 0.4, blue: 0.4))
-                            )
-                            .foregroundColor(.white)
+                            .background(Capsule().fill(.orange.opacity(0.9)))
+                            .foregroundColor(.black)
                     }
                     .padding(.trailing, 110)
                     .accessibilityLabel(showLessonHint ? "Hide hint" : "Show hint")
@@ -165,8 +144,31 @@ struct ContentView: View {
             }
         }
         .onAppear {
-            // Set the guided learning mode in the view model.
+            print("ContentView onAppear: quizCompleted = \(viewModel.quizCompleted), guidedPlaygroundCompleted = \(viewModel.guidedPlaygroundCompleted)")
             viewModel.guidedLearningMode = guidedLearningMode
+            // In ContentView we now do not trigger 50% overlay for quiz.
+            if guidedLearningMode {
+                // Do not reset quizCompleted so that once set, it stays.
+                viewModel.currentGuidedLessonModule = nil
+                viewModel.guidedOutcomeProducts = []
+                viewModel.guidedPlaygroundCompleted = false
+            }
         }
+        // Listen only for final guided playground completion.
+        .onChange(of: viewModel.guidedPlaygroundCompleted) { completed in
+            print("ContentView onChange: guidedPlaygroundCompleted = \(completed)")
+            // Only trigger final overlay if the discovery overlay is dismissed.
+            if completed && viewModel.newlyDiscoveredCompound == nil {
+                overlayProgress = 100
+                overlayNextStep = nil
+                if let lessonModule = viewModel.currentGuidedLessonModule,
+                   !viewModel.completedLessons.contains(lessonModule.id) {
+                    viewModel.completedLessons.insert(lessonModule.id)
+                }
+                print("ContentView: Final overlay triggered: \(overlayProgress)%")
+                showCompletionOverlay = true
+            }
+        }
+
     }
 }

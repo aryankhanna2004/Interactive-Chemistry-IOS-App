@@ -1,6 +1,7 @@
 // CanvasView
 import SwiftUI
 
+
 struct PlacedElementView: View {
     @Binding var placedElement: PlacedElement
     let dragEnded: (CGPoint) -> Void
@@ -10,7 +11,7 @@ struct PlacedElementView: View {
             .font(.headline)
             .foregroundColor(.white)
             .frame(width: 70, height: 70)
-            .background(placedElement.element.color) // Use the element’s color
+            .background(placedElement.element.color)
             .cornerRadius(35)
             .shadow(radius: 2)
             .position(placedElement.position)
@@ -20,18 +21,12 @@ struct PlacedElementView: View {
                         placedElement.position = value.location
                     }
                     .onEnded { value in
-                        if value.location.x < 120 {
-                            placedElement.position.x = 130
-                        }
-                        
-                        // 2) Then check trash or reactions
-                        dragEnded(placedElement.position)
+                        dragEnded(value.location)
                     }
             )
-
-        
     }
 }
+
 
 struct PlacedCompoundView: View {
     @Binding var placedCompound: PlacedCompound

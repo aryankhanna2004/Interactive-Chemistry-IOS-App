@@ -1,229 +1,394 @@
-// MARK: - Lessons List View
 import SwiftUI
 
-struct LessonsListView: View {
-    @EnvironmentObject var viewModel: WorkspaceViewModel
-    
-    private var lessonModules: [LessonModule] {
-        [
-            LessonModule(
-                title: "Salt Reaction Lesson",
-                description: "Sodium and Chlorine form salt (NaCl).",
-                emoji: "🧂",
-                bodyText: """
-                Welcome to the Salt Reaction Lesson!
+struct LessonModule: Identifiable {
+    let id = UUID()
+    // Basic metadata
+    let title: String
+    let description: String
+    let emoji: String
+    // Main content
+    let bodyText: String
+    let reactionEquation: String?
+    // Background info (multiple paragraphs)
+    let backgroundInformation: [String]
+    // Detailed info that can be toggled
+    let detailHeader: String
+    let detailParagraphs: [String]
+    // Quiz information
+    let quizQuestion: String
+    let quizOptions: [String]
+    let correctAnswer: String
+    // Guided lesson info (optional)
+    let guidedLessonTitle: String?
+    let guidedLessonHint: String?
+    let guidedEmoji: String?
+    // Outcome goals for the guided lesson (list of product formulas)
+    let guidedOutcomeGoals: [String]?
+}
+import SwiftUI
 
-                In this lesson, you will learn how sodium (Na) reacts with chlorine (Cl) to form table salt (NaCl). Discover the rich history of salt, its industrial uses, and why it was once a prized commodity.
-                """,
-                reactionEquation: "Na + Cl → NaCl",
-                backgroundInformation: [
-                    "Sodium (Na) is a soft, silvery-white metal known for its reactivity. It loses an electron easily, making it highly reactive with nonmetals.",
-                    "Chlorine (Cl) is a yellow-green gas that readily gains an electron to form chloride ions. Its reactivity makes it useful in various chemical processes.",
-                    "Historical Note: Salt was so valuable in ancient times that it was used as currency and for trade."
-                ],
-                detailHeader: "Compound Details",
-                detailParagraphs: [
-                    "Formula: NaCl",
-                    "Common Uses: Food seasoning, preservation, and industrial applications.",
-                    "Fun Fact: The word 'salary' originates from the Latin word for salt, reflecting its historic value."
-                ],
-                quizQuestion: "Which two elements combine to form salt?",
-                quizOptions: ["Na and Cl", "H and O", "O and Cl"],
-                correctAnswer: "Na and Cl",
-                guidedLessonTitle: "Salt Reaction",
-                guidedLessonHint: "Drag Sodium (Na) and Chlorine (Cl) together in the lab to form salt (NaCl).",
-                guidedEmoji: "🧂"
-            ),
-            LessonModule(
-                title: "Water Reaction Lesson",
-                description: "Hydrogen and Oxygen form water (H₂O).",
-                emoji: "💧",
-                bodyText: """
-                Water is essential for all known forms of life. In this lesson, explore how hydrogen (H) and oxygen (O) combine to form water (H₂O). Learn about water's unique properties, its role as a universal solvent, and its significance in nature.
-                """,
-                reactionEquation: "2H + O → H₂O",
-                backgroundInformation: [
-                    "Hydrogen (H) is the lightest element in the periodic table, often found in its diatomic form (H₂).",
-                    "Oxygen (O) is critical for respiration and is typically present as O₂ in the atmosphere.",
-                    "Water's polarity makes it an excellent solvent for a wide range of substances, influencing countless biological and chemical processes."
-                ],
-                detailHeader: "Properties of Water",
-                detailParagraphs: [
-                    "Formula: H₂O",
-                    "Key Uses: Drinking, agriculture, industry, and countless biological functions.",
-                    "Fun Fact: Approximately 60% of the human body is made up of water."
-                ],
-                quizQuestion: "What is the chemical formula for water?",
-                quizOptions: ["H₂O", "CO₂", "NaCl"],
-                correctAnswer: "H₂O",
-                guidedLessonTitle: "Water Reaction",
-                guidedLessonHint: "Drag Hydrogen (H) and Oxygen (O) together to form water (H₂O).",
-                guidedEmoji: "💧"
-            ),
-            LessonModule(
-                title: "Oxygen Gas Lesson",
-                description: "Learn how atomic oxygen forms O₂ gas.",
-                emoji: "🌬️",
-                bodyText: """
-                Oxygen gas (O₂) is vital for respiration and combustion. In this lesson, understand how individual oxygen atoms combine to form diatomic oxygen. Delve into its properties, importance in Earth's atmosphere, and industrial applications.
-                """,
-                reactionEquation: "2O → O₂",
-                backgroundInformation: [
-                    "Oxygen is the third most abundant element in the universe by mass.",
-                    "On Earth, oxygen gas constitutes about 21% of the atmosphere and is crucial for the survival of most organisms.",
-                    "Industrial Uses: Oxygen is used in steel-making, welding, and medical applications."
-                ],
-                detailHeader: "Properties of O₂",
-                detailParagraphs: [
-                    "Formula: O₂",
-                    "Visual Note: Liquid oxygen has a pale blue color.",
-                    "Fun Fact: Despite being a colorless gas, liquid oxygen is distinctly blue."
-                ],
-                quizQuestion: "Which formula represents oxygen gas?",
-                quizOptions: ["O", "O₂", "O₃"],
-                correctAnswer: "O₂",
-                guidedLessonTitle: "Oxygen Gas Formation",
-                guidedLessonHint: "Combine two oxygen atoms to see oxygen gas (O₂) form.",
-                guidedEmoji: "🌬️"
-            ),
-            LessonModule(
-                title: "Hydrogen Gas Lesson",
-                description: "Hydrogen atoms combine to form diatomic hydrogen (H₂).",
-                emoji: "⚡",
-                bodyText: """
-                Hydrogen is the simplest and most abundant element in the universe. This lesson demonstrates how two hydrogen atoms combine to form diatomic hydrogen (H₂), and explores its properties, applications in energy, and its role in the cosmos.
-                """,
-                reactionEquation: "2H → H₂",
-                backgroundInformation: [
-                    "Hydrogen (H) has one proton and one electron, making it the simplest atom.",
-                    "Diatomic hydrogen (H₂) is used as a fuel in various energy applications, including fuel cells.",
-                    "Cosmic Significance: Hydrogen is the primary building block for stars and galaxies."
-                ],
-                detailHeader: "Properties of H₂",
-                detailParagraphs: [
-                    "Formula: H₂",
-                    "Characteristic: It is the lightest and most abundant gas in the universe.",
-                    "Fun Fact: Hydrogen gas is nearly invisible but can be detected by its distinct sound when ignited."
-                ],
-                quizQuestion: "How many hydrogen atoms are needed to form diatomic hydrogen (H₂)?",
-                quizOptions: ["1", "2", "3"],
-                correctAnswer: "2",
-                guidedLessonTitle: "Hydrogen Gas Formation",
-                guidedLessonHint: "Drag two hydrogen atoms together to form H₂.",
-                guidedEmoji: "⚡"
-            ),
-            LessonModule(
-                title: "Hydroxyl Radical Lesson (OH)",
-                description: "Discover the reactivity of the hydroxyl radical (OH).",
-                emoji: "🔥",
-                bodyText: """
-                The hydroxyl radical (OH) is a highly reactive molecule that plays a key role in atmospheric chemistry. In this lesson, learn how a hydrogen atom and an oxygen atom can form the hydroxyl radical, its role in breaking down pollutants, and its transient nature.
-                """,
-                reactionEquation: "H + O → OH",
-                backgroundInformation: [
-                    "OH is known as the 'detergent' of the atmosphere due to its ability to react with many pollutants.",
-                    "It is extremely reactive and short-lived under normal conditions.",
-                    "Scientific Insight: The presence of OH is crucial for maintaining the balance of various atmospheric chemicals."
-                ],
-                detailHeader: "Properties of OH",
-                detailParagraphs: [
-                    "Formula: OH",
-                    "Role: Initiates the breakdown of pollutants and organic compounds in the atmosphere.",
-                    "Fun Fact: Despite its high reactivity, OH radicals are present in only trace amounts in the air."
-                ],
-                quizQuestion: "Which elements combine to create the hydroxyl radical?",
-                quizOptions: ["H and Cl", "Na and O", "H and O"],
-                correctAnswer: "H and O",
-                guidedLessonTitle: "Hydroxyl Radical Formation",
-                guidedLessonHint: "Drag a hydrogen atom and an oxygen atom together to form OH.",
-                guidedEmoji: "🔥"
-            ),
-            LessonModule(
-                title: "Salt + Hydroxyl Lesson",
-                description: "Explore a reaction between salt (NaCl) and the hydroxyl radical (OH).",
-                emoji: "🔬",
-                bodyText: """
-                In this lesson, we explore a simplified model of a reaction between salt (NaCl) and the hydroxyl radical (OH). Although real-world chemistry may be more complex, this demonstration shows how different reactants can yield multiple products, highlighting the dynamic nature of chemical reactions.
-                """,
-                reactionEquation: "NaCl + OH → NaOH + Cl",
-                backgroundInformation: [
-                    "NaCl (salt) is a familiar compound used in everyday life for seasoning and preservation.",
-                    "The hydroxyl radical (OH) can interact with salt under specific conditions to produce sodium hydroxide (NaOH) and chlorine (Cl).",
-                    "This reaction is presented as a simplified model for educational purposes."
-                ],
-                detailHeader: "Possible Products",
-                detailParagraphs: [
-                    "Simplified Reaction: NaCl + OH → NaOH + Cl",
-                    "Sodium Hydroxide (NaOH): Widely used in industry for cleaning and soap making.",
-                    "Chlorine (Cl): Can be a reactive intermediate in further chemical processes."
-                ],
-                quizQuestion: "Which product might form from NaCl + OH in this model?",
-                quizOptions: ["NaOH + Cl", "NaOH + HCl", "H₂O", "Unknown"],
-                correctAnswer: "NaOH + Cl",
-                guidedLessonTitle: "Salt + Hydroxyl Reaction",
-                guidedLessonHint: "Drag salt (NaCl) and hydroxyl (OH) together to observe the reaction.",
-                guidedEmoji: "🔬"
-            )
-        ]
-    }
+struct GenericLessonView: View {
+    @EnvironmentObject var viewModel: WorkspaceViewModel
+    let lesson: LessonModule
     
+    @State private var selectedAnswer: String? = nil
+    @State private var showDetails = false
+    
+    @State private var showQuizOverlay = false
+    @State private var quizOverlayProgress: Double = 0
+    @State private var quizNextStep: String? = nil
+    
+    // Define a main brand orange for headers/buttons.
+    private let brandOrange = Color(red: 0.95, green: 0.60, blue: 0.15)
+
     var body: some View {
-            NavigationStack {
-                ScrollView {
-                    LazyVStack(spacing: 16) {
-                        ForEach(lessonModules) { module in
-                            NavigationLink(destination: GenericLessonView(lesson: module)
-                                            .environmentObject(viewModel)) {
-                                LessonRow(module: module)
-                            }
-                        }
+        ZStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 20) {
+                    
+                    // 1) Title bar (brand orange)
+                    titleSection
+                    
+                    // 2) Body text (white card with subtle orange stroke)
+                    bodyTextSection
+                    
+                    // 3) Reaction equation card
+                    if let eq = lesson.reactionEquation {
+                        reactionEquationCard(equation: eq)
                     }
-                    .padding()
+                    
+                    Divider().padding(.vertical, 8)
+                    
+                    // 4) Background info section
+                    backgroundInfoSection
+                    
+                    // 5) Additional info toggle
+                    detailsToggleSection
+                    
+                    Divider().padding(.vertical, 8)
+                    
+                    // 6) Quiz time
+                    quizSection
+                    
+                    // 7) CTA to guided lesson
+                    guidedLessonCTA
+                        .padding(.top, 20)
+                    
+                    Spacer(minLength: 30)
                 }
-                .navigationTitle("Lessons")
-                .background(Color(.systemGroupedBackground))
+                .padding()
+            }
+            .navigationTitle("")
+            .navigationBarTitleDisplayMode(.inline)
+            .navigationBarBackButtonHidden(false)
+            .background(Color(.systemGroupedBackground))
+            .edgesIgnoringSafeArea(.bottom)
+            
+            // Quiz overlay
+            if showQuizOverlay {
+                LessonProgressOverlay(
+                    lessonName: lesson.title,
+                    currentProgress: quizOverlayProgress,
+                    nextStep: quizNextStep
+                ) {
+                    withAnimation {
+                        showQuizOverlay = false
+                    }
+                }
             }
         }
     }
-
-    // MARK: - LessonRow Subview
-
-    struct LessonRow: View {
-        let module: LessonModule
-        
-        var body: some View {
-            HStack {
-                Text(module.guidedEmoji ?? "")
-                    .font(.system(size: 40))
-                    .padding()
+    
+    // 1) Title Section
+    private var titleSection: some View {
+        HStack {
+            Text(lesson.title)
+                .font(.largeTitle)
+                .bold()
+                .foregroundColor(.white)
+                .minimumScaleFactor(0.8)
+                .lineLimit(1)
+            
+            Text(lesson.emoji)
+                .font(.largeTitle)
+                .lineLimit(1)
+        }
+        .padding()
+        .frame(maxWidth: .infinity)
+        // Use your main brand color here:
+        .background(brandOrange)
+        .cornerRadius(12)
+        .shadow(color: Color.black.opacity(0.15), radius: 5, x: 0, y: 2)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(lesson.title) \(lesson.emoji)")
+    }
+    
+    // 2) Body Text Section
+    private var bodyTextSection: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text(lesson.bodyText)
+                .font(.body)
+                .foregroundColor(.primary)
+        }
+        .padding()
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color.white)
+        )
+        // Subtle orange stroke instead of full color fill:
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(brandOrange.opacity(0.15), lineWidth: 1)
+        )
+        .accessibilityElement()
+        .accessibilityLabel(lesson.bodyText)
+    }
+    
+    // 3) Reaction Equation Card
+    private func reactionEquationCard(equation: String) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Reaction Equation")
+                .font(.title2)
+                .bold()
+            
+            // Use a white box with a light shadow or stroke
+            Text(equation)
+                .font(.title)
+                .foregroundColor(brandOrange)
+                .padding(6)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(Color.white)
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 8)
+                        .stroke(brandOrange.opacity(0.15), lineWidth: 1)
+                )
+                .shadow(color: .black.opacity(0.05), radius: 2)
+        }
+        .padding()
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color.white)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(brandOrange.opacity(0.1), lineWidth: 1)
+        )
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Reaction Equation: \(equation)")
+    }
+    
+    // 4) Background Info Section
+    @ViewBuilder
+    private var backgroundInfoSection: some View {
+        if !lesson.backgroundInformation.isEmpty {
+            VStack(alignment: .leading, spacing: 12) {
+                Text("Background Info")
+                    .font(.title2)
+                    .bold()
                 
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(module.title)
-                        .font(.headline)
-                        .bold()
-                        .foregroundColor(.primary)
-                    Text(module.description)
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
+                ForEach(lesson.backgroundInformation, id: \.self) { paragraph in
+                    Text(paragraph)
+                        .font(.body)
+                        .padding(8)
+                        .background(
+                            RoundedRectangle(cornerRadius: 8)
+                                .fill(Color.white)
+                        )
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 8)
+                                .stroke(brandOrange.opacity(0.1), lineWidth: 1)
+                        )
+                        .accessibilityElement()
+                        .accessibilityLabel(paragraph)
                 }
-                Spacer()
-                Image(systemName: "chevron.right")
-                    .foregroundColor(.gray)
-                    .padding()
             }
             .padding()
             .background(
-                RoundedRectangle(cornerRadius: 15)
-                    .fill(LinearGradient(
-                        gradient: Gradient(colors: [Color.orange.opacity(0.2), Color.pink.opacity(0.2)]),
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    ))
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(Color.white)
             )
             .overlay(
-                RoundedRectangle(cornerRadius: 15)
-                    .stroke(Color.orange, lineWidth: 1)
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(brandOrange.opacity(0.1), lineWidth: 1)
             )
-            .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
         }
     }
+
+    // 5) Additional Info Toggle
+    private var detailsToggleSection: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Button(action: {
+                withAnimation(.easeInOut(duration: 0.2)) {
+                    showDetails.toggle()
+                }
+            }) {
+                HStack {
+                    Image(systemName: showDetails ? "chevron.up.circle.fill" : "chevron.down.circle.fill")
+                        .foregroundColor(brandOrange)
+                    
+                    Text(showDetails ? "Hide Additional Info" : "Show Additional Info")
+                        .bold()
+                        .foregroundColor(.primary)
+                }
+                .padding()
+                .frame(maxWidth: .infinity)
+                // Light brandOrange tint, not a full fill:
+                .background(brandOrange.opacity(0.1))
+                .cornerRadius(12)
+                .accessibilityLabel(showDetails ? "Hide additional info" : "Show additional info")
+            }
+            if showDetails {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text(lesson.detailHeader)
+                        .font(.title3)
+                        .bold()
+                    
+                    ForEach(lesson.detailParagraphs, id: \.self) { detail in
+                        Text(detail)
+                            .font(.body)
+                            .accessibilityLabel(detail)
+                    }
+                }
+                .padding()
+                .background(
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(Color.white)
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(brandOrange.opacity(0.1), lineWidth: 1)
+                )
+                .transition(.opacity)
+            }
+        }
+    }
+    
+    // 6) Quiz Section
+    private var quizSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Quiz Time!")
+                .font(.title2)
+                .bold()
+            
+            Text(lesson.quizQuestion)
+                .font(.body)
+                .bold()
+            
+            VStack(spacing: 10) {
+                ForEach(lesson.quizOptions, id: \.self) { option in
+                    QuizOption(
+                        option: option,
+                        correctOption: lesson.correctAnswer,
+                        selectedOption: $selectedAnswer
+                    ) {
+                        if !viewModel.completedLessons.contains(lesson.id) && !viewModel.quizCompleted {
+                            viewModel.quizCompleted = true
+                            showQuizOverlay = true
+                            quizOverlayProgress = 50
+                            quizNextStep = "Try forming it in the lab!"
+                        }
+                    }
+                }
+            }
+            
+            if let answer = selectedAnswer {
+                let feedback = (answer == lesson.correctAnswer)
+                    ? "✅ Correct!"
+                    : "❌ Oops, that's not correct. Try again!"
+                Text(feedback)
+                    .foregroundColor(answer == lesson.correctAnswer ? .green : .red)
+                    .bold()
+            }
+        }
+        .padding()
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color.white)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(brandOrange.opacity(0.15), lineWidth: 1)
+        )
+    }
+    
+    // 7) Guided Lesson CTA
+    @ViewBuilder
+    private var guidedLessonCTA: some View {
+        if let guidedTitle = lesson.guidedLessonTitle, let guidedHint = lesson.guidedLessonHint {
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack {
+                    NavigationLink(destination: {
+                        ContentView(guidedLearningMode: true)
+                            .environmentObject(viewModel)
+                            .onAppear {
+                                viewModel.guidedLearningMode = true
+                                viewModel.currentGuidedLessonModule = lesson
+                                viewModel.guidedOutcomeProducts = []
+                                viewModel.guidedPlaygroundCompleted = false
+                                viewModel.currentGuidedLesson = GuidedLesson(title: guidedTitle, hint: guidedHint)
+                            }
+                    }) {
+                        HStack {
+                            Image(systemName: "flask")
+                                .font(.title3)
+                                .accessibilityHidden(true)
+                            Text("Try forming it in the lab!")
+                                .font(.headline)
+                                .bold()
+                                .multilineTextAlignment(.leading)
+                        }
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 10)
+                        .background(brandOrange) // Keep the strong brand color for your CTA
+                        .foregroundColor(.white)
+                        .cornerRadius(12)
+                        .shadow(radius: 5)
+                        .accessibilityLabel("Try forming \(guidedTitle) in the lab.")
+                    }
+                }
+                .padding(.horizontal)
+            }
+        }
+    }
+}
+
+// MARK: - QuizOption
+struct QuizOption: View {
+    let option: String
+    let correctOption: String
+    @Binding var selectedOption: String?
+    var markLessonComplete: (() -> Void)?
+    
+    var body: some View {
+        Button(action: {
+            selectedOption = option
+            if option == correctOption {
+                markLessonComplete?()
+            }
+        }) {
+            Text(option)
+                .font(.body)
+                .bold()
+                .padding()
+                .frame(maxWidth: .infinity)
+                .foregroundColor(selectedOption == option ? .white : .primary)
+                .background(buttonBackground)
+                .cornerRadius(12)
+                .accessibilityLabel("Answer option: \(option)")
+        }
+        .padding(.horizontal, 10)
+    }
+    
+    // Unselected: light brand orange; correct: green; incorrect: red
+    private var buttonBackground: Color {
+        if let selected = selectedOption, selected == option {
+            return option == correctOption ? .green : .red
+        } else {
+            // A soft orange tint for unselected
+            return .orange.opacity(0.4)
+        }
+    }
+}
