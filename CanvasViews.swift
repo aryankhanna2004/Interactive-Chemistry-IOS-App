@@ -57,16 +57,17 @@ struct PlacedCompoundView: View {
                     dragEnded(value.location)
                 }
         )
+        // Single tap => show info panel
         .onTapGesture {
-            // Single tap => show info
             infoAction()
         }
+        // Double tap => break the compound
         .onTapGesture(count: 2) {
-            // Double tap => break
             breakAction()
         }
     }
 }
+
 
 /// The main workspace canvas where elements and compounds are displayed.
 

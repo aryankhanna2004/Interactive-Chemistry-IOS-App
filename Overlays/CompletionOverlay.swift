@@ -1,5 +1,7 @@
 import SwiftUI
 
+// MARK: - Overlay Example
+
 struct LessonProgressOverlay: View {
     let lessonName: String
     let currentProgress: Double  // value from 0 to 100
@@ -11,19 +13,17 @@ struct LessonProgressOverlay: View {
 
     var body: some View {
         ZStack {
-            // 1) Dimmed background so overlay stands out
+            // Dim background
             Color.black.opacity(0.3)
                 .edgesIgnoringSafeArea(.all)
 
-            // 2) Main card
+            // Main card
             VStack(spacing: 24) {
-                // Lesson title
                 Text(lessonName)
                     .font(.title2)
                     .fontWeight(.semibold)
                     .foregroundColor(.primary)
 
-                // Progress circle
                 ZStack {
                     Circle()
                         .stroke(Color.gray.opacity(0.3), lineWidth: 15)
@@ -42,7 +42,6 @@ struct LessonProgressOverlay: View {
                         .foregroundColor(.primary)
                 }
 
-                // Next step or completion text
                 if animatedProgress < 100, let next = nextStep {
                     Text("Next: \(next)")
                         .font(.body)
@@ -53,7 +52,6 @@ struct LessonProgressOverlay: View {
                         .foregroundColor(.secondary)
                 }
 
-                // Dismiss button (orange background, white text)
                 Button(action: {
                     dismissAction()
                 }) {
@@ -67,20 +65,19 @@ struct LessonProgressOverlay: View {
                 }
             }
             .padding(24)
-            .frame(maxWidth: 320) // Restrict the overlay’s width
+            .frame(maxWidth: 320)
             .background(
                 RoundedRectangle(cornerRadius: 16)
                     .fill(Color(.systemBackground))
             )
             .shadow(radius: 8)
 
-            // 3) Show confetti if lesson is fully complete
+            // Confetti if 100% complete
             if showConfetti {
                 ConfettiView()
             }
         }
         .onAppear {
-            // Animate progress once the view appears
             animatedProgress = currentProgress
         }
         .onChange(of: animatedProgress) { newValue in
@@ -92,9 +89,8 @@ struct LessonProgressOverlay: View {
     }
 }
 
+// MARK: - Confetti
 
-
-// A simple confetti view that creates moving circles as confetti.
 struct ConfettiView: View {
     @State private var confettiPieces: [ConfettiPiece] = []
     
@@ -127,10 +123,12 @@ struct ConfettiView: View {
         for _ in 0..<50 {
             let x = CGFloat.random(in: 0...size.width)
             let y = CGFloat.random(in: -50...0)
-            let piece = ConfettiPiece(position: CGPoint(x: x, y: y),
-                                      size: CGFloat.random(in: 5...10),
-                                      color: [Color.red, Color.green, Color.blue, Color.yellow].randomElement() ?? Color.white,
-                                      opacity: 1.0)
+            let piece = ConfettiPiece(
+                position: CGPoint(x: x, y: y),
+                size: CGFloat.random(in: 5...10),
+                color: [Color.red, Color.green, Color.blue, Color.yellow].randomElement() ?? Color.white,
+                opacity: 1.0
+            )
             pieces.append(piece)
         }
         return pieces

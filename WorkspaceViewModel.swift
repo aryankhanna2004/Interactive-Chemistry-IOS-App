@@ -60,17 +60,22 @@ class WorkspaceViewModel: ObservableObject {
     @Published var currentGuidedLesson: GuidedLesson? = nil
     @Published var completedLessons: Set<UUID> = []
     
+    // NEW: A recommendation hint to help the user.
+    @Published var reactionHint: String? = nil
+    
     // Canvas constants.
     let elementSize: CGFloat = 70
-    let clusterThreshold: CGFloat = 50
+    let clusterThreshold: CGFloat = 70
     
     // MARK: - Add Element & Check Reactions
+    
     func addElement(_ element: Element, at position: CGPoint) {
         placedElements.append(PlacedElement(element: element, position: position))
         checkForReactions()
     }
     
     func checkForReactions() {
+        // Run the clustering & reaction detection algorithm.
         let clusters = buildClusters(fromElements: placedElements, andCompounds: placedCompounds, threshold: clusterThreshold)
         
         for cluster in clusters {
@@ -141,7 +146,6 @@ class WorkspaceViewModel: ObservableObject {
                                     }
                                 }
                             } else {
-                                displayInfoPanel(for: productCompound)
                                 checkBadges(for: productCompound)
                             }
                         }
@@ -159,6 +163,38 @@ class WorkspaceViewModel: ObservableObject {
             placedElements.removeAll { clusterConsumedIDs.contains($0.id) }
             placedCompounds.removeAll { clusterConsumedIDs.contains($0.id) }
         }
+        
+        // After processing reactions, run our recommendation algorithm.
+        recommendReactionHint()
+    }
+    
+    /// Check free elements on the canvas and set a hint if a reaction is nearly possible.
+    func recommendReactionHint() {
+        // Reset previous hint.
+        reactionHint = nil
+        
+        // Count free elements (those not in compounds).
+        var counts: [String: Int] = [:]
+        for placed in placedElements {
+            counts[placed.element.symbol, default: 0] += 1
+        }
+        
+        // Example: Recommend water (H₂O) formation.
+        // Reaction: 2 H + O -> H₂O
+        if let hCount = counts["H"], let oCount = counts["O"] {
+            if hCount >= 2 && oCount >= 1 && !reactionHistory.contains(where: { $0.formula == "H₂O" }) {
+                reactionHint = "Try combining two hydrogen atoms and one oxygen atom to form water (H₂O)."
+                return
+            }
+        }
+        
+        // --- Alternative ideas (not implemented) ---
+        // 1. If there are H₂ molecules and O₂ molecules nearby, recommend combining 2 H₂ + O₂ -> 2 H₂O.
+        // 2. If an OH radical is almost formed, recommend combining an H atom with an OH radical to form water.
+        // 3. If a cluster has one O atom but only one H atom, recommend: "Add one more hydrogen atom."
+        // 4. If a cluster has excess H atoms, recommend adding an oxygen atom to balance the reaction.
+        // 5. Provide a panel listing balanced reactions (e.g., 2 H₂ + O₂ -> 2 H₂O) as a guideline.
+        // ------------------------------------------------
     }
     
     func possibleReactionsStartingWith(_ element: Element) -> [Compound] {
@@ -176,6 +212,7 @@ class WorkspaceViewModel: ObservableObject {
     }
     
     // MARK: - Info Panel & Breaking Compounds
+    
     private func displayInfoPanel(for compound: Compound) {
         print("Displaying info panel for: \(compound.formula)")
         infoPanelCompound = compound
@@ -184,15 +221,23 @@ class WorkspaceViewModel: ObservableObject {
     
     func breakCompound(_ compound: PlacedCompound) {
         withAnimation {
+            var restoredElements: [PlacedElement] = []
+            
             for oldElement in compound.constituentElements {
-                var newEl = oldElement
-                newEl.position = CGPoint(
-                    x: compound.position.x + CGFloat.random(in: -20...20),
-                    y: compound.position.y + CGFloat.random(in: -20...20)
+                let newEl = PlacedElement(
+                    element: oldElement.element,
+                    position: CGPoint(
+                        x: compound.position.x + CGFloat.random(in: -30...30),
+                        y: compound.position.y + CGFloat.random(in: -30...30)
+                    )
                 )
-                placedElements.append(newEl)
+                restoredElements.append(newEl)
             }
+            
             placedCompounds.removeAll { $0.id == compound.id }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                self.placedElements.append(contentsOf: restoredElements)
+            }
         }
     }
     
@@ -211,6 +256,7 @@ class WorkspaceViewModel: ObservableObject {
     }
     
     // MARK: - Discovery & Badges
+    
     private func registerDiscovery(of compound: Compound) {
         if !discoveredCompounds.contains(compound.formula) {
             discoveredCompounds.insert(compound.formula)
@@ -264,7 +310,8 @@ class WorkspaceViewModel: ObservableObject {
     }
 }
 
-// A BFS-based clustering approach.
+// MARK: - Clustering Algorithm
+
 struct ReactiveItem: Identifiable {
     let id: UUID
     let symbol: String

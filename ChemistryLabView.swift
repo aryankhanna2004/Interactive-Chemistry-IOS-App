@@ -5,7 +5,6 @@ struct ChemistryLabHomeView: View {
     @State private var showDashboard = false
     @StateObject private var viewModel = WorkspaceViewModel()
     
-    // Use sample lessons from our data model (see LessonModule.swift)
     let lessonModules: [LessonModule] = LessonModule.sampleModules
     
     var body: some View {
@@ -22,10 +21,10 @@ struct ChemistryLabHomeView: View {
                 )
                 .edgesIgnoringSafeArea(.all)
                 
-                // 2) Main content in a centered VStack
-                VStack {
-                    Spacer()
+                // 2) ScrollView so content can overflow
+                ScrollView(.vertical, showsIndicators: true) {
                     
+                    // 3) Main VStack for content
                     VStack(spacing: 25) {
                         // Logo / Top Image
                         Image("iTunesArtwork")
@@ -79,7 +78,7 @@ struct ChemistryLabHomeView: View {
                             }
                         }
                         
-                        // NEW: Dashboard Button
+                        // Dashboard Button
                         Button {
                             showDashboard = true
                         } label: {
@@ -97,7 +96,7 @@ struct ChemistryLabHomeView: View {
                                 .environmentObject(viewModel)
                         }
                         
-                        // Existing Badges Button
+                        // Badges Button
                         Button {
                             showBadges = true
                         } label: {
@@ -113,7 +112,6 @@ struct ChemistryLabHomeView: View {
                         .sheet(isPresented: $showBadges) {
                             NavigationStack {
                                 BadgeView(badges: viewModel.unlockedBadges)
-                                    
                                     .toolbar {
                                         ToolbarItem(placement: .navigationBarLeading) {
                                             Button("Close") {
@@ -124,18 +122,10 @@ struct ChemistryLabHomeView: View {
                             }
                         }
                     }
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    
-                    Spacer()
+                    // 4) Make the VStack fill at least the screen height, so it can center if short
+                    .frame(minHeight: UIScreen.main.bounds.height, alignment: .center)
                 }
             }
         }
-    }
-}
-
-struct ChemistryLabHomeView_Previews: PreviewProvider {
-    static var previews: some View {
-        ChemistryLabHomeView()
-            .previewInterfaceOrientation(.landscapeLeft)
     }
 }

@@ -261,29 +261,35 @@ final class ReactionRepository: ObservableObject {
     ///
     /// The BFS approach in your code calls this repeatedly until none match or stoich is empty.
     func findReactionFactor(in symbols: [String: Int]) -> (BalancedReaction, Int)? {
+        var applicableReactions: [(reaction: BalancedReaction, factor: Int)] = []
+        
+        // Check each reaction to see if it can run with the available counts.
         for reaction in balancedReactions {
             var possibleFactor = Int.max
-            
+            var isApplicable = true
             for (formula, neededCount) in reaction.reactants {
                 guard let availableCount = symbols[formula] else {
-                    // This reactant is missing; can't do this reaction at all
-                    possibleFactor = 0
+                    isApplicable = false
                     break
                 }
-                
-                // How many times can we form the reaction based on this reactant?
-                let factorForThisReactant = availableCount / neededCount
-                if factorForThisReactant < possibleFactor {
-                    possibleFactor = factorForThisReactant
-                }
+                possibleFactor = min(possibleFactor, availableCount / neededCount)
             }
-            
-            if possibleFactor > 0 && possibleFactor != Int.max {
-                // We can produce that reaction at least once
-                return (reaction, possibleFactor)
+            if isApplicable && possibleFactor > 0 {
+                applicableReactions.append((reaction, possibleFactor))
             }
         }
         
-        return nil
+        // If none of the reactions are possible, return nil.
+        guard !applicableReactions.isEmpty else { return nil }
+        
+        // Choose the reaction that uses the most reactants (sum of counts).
+        // For instance, if reaction A uses 2 atoms total and reaction B uses 3, pick reaction B.
+        let chosen = applicableReactions.max { lhs, rhs in
+            let lhsTotal = lhs.reaction.reactants.values.reduce(0, +)
+            let rhsTotal = rhs.reaction.reactants.values.reduce(0, +)
+            return lhsTotal < rhsTotal
+        }
+        
+        return chosen
     }
 }

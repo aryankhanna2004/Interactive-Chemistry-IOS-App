@@ -1,44 +1,69 @@
 import SwiftUI
 
+// MARK: - Lesson & Quiz Data
+
 struct LessonModule: Identifiable {
     let id = UUID()
-    // Basic metadata
+    
     let title: String
     let description: String
     let emoji: String
-    // Main content
+    
     let bodyText: String
     let reactionEquation: String?
-    // Background info (multiple paragraphs)
+    
     let backgroundInformation: [String]
-    // Detailed info that can be toggled
+    
     let detailHeader: String
     let detailParagraphs: [String]
-    // Quiz information
-    let quizQuestion: String
-    let quizOptions: [String]
-    let correctAnswer: String
-    // Guided lesson info (optional)
+    
+    // Quiz questions (only true/false and multiple choice)
+    let quizQuestions: [QuizQuestion]
+    
     let guidedLessonTitle: String?
     let guidedLessonHint: String?
     let guidedEmoji: String?
-    // Outcome goals for the guided lesson (list of product formulas)
     let guidedOutcomeGoals: [String]?
 }
-import SwiftUI
+
+enum QuizQuestionType {
+    case multipleChoice
+    case trueFalse
+}
+
+struct QuizQuestion: Identifiable {
+    let id = UUID()
+    let type: QuizQuestionType
+    let prompt: String
+    
+    // For multiple choice / T/F
+    let choices: [String]?
+    let correctChoice: String?
+}
+
+// MARK: - GenericLessonView
 
 struct GenericLessonView: View {
     @EnvironmentObject var viewModel: WorkspaceViewModel
     let lesson: LessonModule
     
-    @State private var selectedAnswer: String? = nil
     @State private var showDetails = false
     
+    // For the 50% overlay after quiz
     @State private var showQuizOverlay = false
     @State private var quizOverlayProgress: Double = 0
     @State private var quizNextStep: String? = nil
     
-    // Define a main brand orange for headers/buttons.
+    // QUIZ STATES
+    @State private var userAnswers: [UUID: String] = [:]
+    @State private var questionResults: [UUID: Bool] = [:]
+    @State private var quizSubmitted = false
+    @State private var quizScoreString: String?
+    
+    // Button pop animation state
+    @State private var submitButtonScale: CGFloat = 1.0
+    
+    // Brand color
     private let brandOrange = Color(red: 0.95, green: 0.60, blue: 0.15)
 
     var body: some View {
@@ -46,28 +71,28 @@ struct GenericLessonView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 20) {
                     
-                    // 1) Title bar (brand orange)
+                    // 1) Title bar
                     titleSection
                     
-                    // 2) Body text (white card with subtle orange stroke)
+                    // 2) Body text
                     bodyTextSection
                     
-                    // 3) Reaction equation card
+                    // 3) Reaction equation
                     if let eq = lesson.reactionEquation {
                         reactionEquationCard(equation: eq)
                     }
                     
                     Divider().padding(.vertical, 8)
                     
-                    // 4) Background info section
+                    // 4) Background info
                     backgroundInfoSection
                     
-                    // 5) Additional info toggle
+                    // 5) Additional info
                     detailsToggleSection
                     
                     Divider().padding(.vertical, 8)
                     
-                    // 6) Quiz time
+                    // 6) Quiz
                     quizSection
                     
                     // 7) CTA to guided lesson
@@ -78,13 +103,13 @@ struct GenericLessonView: View {
                 }
                 .padding()
             }
+            .background(Color(.systemGroupedBackground))
             .navigationTitle("")
             .navigationBarTitleDisplayMode(.inline)
             .navigationBarBackButtonHidden(false)
-            .background(Color(.systemGroupedBackground))
             .edgesIgnoringSafeArea(.bottom)
             
-            // Quiz overlay
+            // 50% overlay if user got everything correct
             if showQuizOverlay {
                 LessonProgressOverlay(
                     lessonName: lesson.title,
@@ -98,69 +123,58 @@ struct GenericLessonView: View {
             }
         }
     }
-    
-    // 1) Title Section
+}
+
+// MARK: - Subviews
+
+extension GenericLessonView {
+    // 1) Title bar
     private var titleSection: some View {
         HStack {
             Text(lesson.title)
                 .font(.largeTitle)
                 .bold()
                 .foregroundColor(.white)
-                .minimumScaleFactor(0.8)
-                .lineLimit(1)
             
             Text(lesson.emoji)
                 .font(.largeTitle)
-                .lineLimit(1)
         }
         .padding()
         .frame(maxWidth: .infinity)
-        // Use your main brand color here:
         .background(brandOrange)
         .cornerRadius(12)
-        .shadow(color: Color.black.opacity(0.15), radius: 5, x: 0, y: 2)
-        .accessibilityElement(children: .combine)
-        .accessibilityLabel("\(lesson.title) \(lesson.emoji)")
+        .shadow(color: .black.opacity(0.2), radius: 5, x: 0, y: 2)
     }
     
-    // 2) Body Text Section
+    // 2) Body text
     private var bodyTextSection: some View {
         VStack(alignment: .leading, spacing: 6) {
             Text(lesson.bodyText)
                 .font(.body)
-                .foregroundColor(.primary)
         }
         .padding()
-        .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(Color.white)
-        )
-        // Subtle orange stroke instead of full color fill:
+        .background(RoundedRectangle(cornerRadius: 12).fill(Color.white))
         .overlay(
             RoundedRectangle(cornerRadius: 12)
                 .stroke(brandOrange.opacity(0.15), lineWidth: 1)
         )
-        .accessibilityElement()
-        .accessibilityLabel(lesson.bodyText)
     }
     
-    // 3) Reaction Equation Card
+    // 3) Reaction card
     private func reactionEquationCard(equation: String) -> some View {
         VStack(alignment: .leading, spacing: 8) {
             Text("Reaction Equation")
                 .font(.title2)
                 .bold()
+                .foregroundColor(.orange)
             
-            // Use a white box with a light shadow or stroke
             Text(equation)
                 .font(.title)
-                .foregroundColor(brandOrange)
+                .bold()
+                .foregroundColor(Color(hue: 0.65, saturation: 0.6, brightness: 0.75))
                 .padding(6)
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .background(
-                    RoundedRectangle(cornerRadius: 8)
-                        .fill(Color.white)
-                )
+                .background(RoundedRectangle(cornerRadius: 8).fill(Color.white))
                 .overlay(
                     RoundedRectangle(cornerRadius: 8)
                         .stroke(brandOrange.opacity(0.15), lineWidth: 1)
@@ -168,19 +182,14 @@ struct GenericLessonView: View {
                 .shadow(color: .black.opacity(0.05), radius: 2)
         }
         .padding()
-        .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(Color.white)
-        )
+        .background(RoundedRectangle(cornerRadius: 12).fill(Color.white))
         .overlay(
             RoundedRectangle(cornerRadius: 12)
                 .stroke(brandOrange.opacity(0.1), lineWidth: 1)
         )
-        .accessibilityElement(children: .combine)
-        .accessibilityLabel("Reaction Equation: \(equation)")
     }
     
-    // 4) Background Info Section
+    // 4) Background info
     @ViewBuilder
     private var backgroundInfoSection: some View {
         if !lesson.backgroundInformation.isEmpty {
@@ -188,35 +197,28 @@ struct GenericLessonView: View {
                 Text("Background Info")
                     .font(.title2)
                     .bold()
+                    .foregroundColor(.orange)
                 
                 ForEach(lesson.backgroundInformation, id: \.self) { paragraph in
                     Text(paragraph)
                         .font(.body)
                         .padding(8)
-                        .background(
-                            RoundedRectangle(cornerRadius: 8)
-                                .fill(Color.white)
-                        )
+                        .background(RoundedRectangle(cornerRadius: 8).fill(Color.white))
                         .overlay(
                             RoundedRectangle(cornerRadius: 8)
                                 .stroke(brandOrange.opacity(0.1), lineWidth: 1)
                         )
-                        .accessibilityElement()
-                        .accessibilityLabel(paragraph)
                 }
             }
             .padding()
-            .background(
-                RoundedRectangle(cornerRadius: 12)
-                    .fill(Color.white)
-            )
+            .background(RoundedRectangle(cornerRadius: 12).fill(Color.white))
             .overlay(
                 RoundedRectangle(cornerRadius: 12)
                     .stroke(brandOrange.opacity(0.1), lineWidth: 1)
             )
         }
     }
-
+    
     // 5) Additional Info Toggle
     private var detailsToggleSection: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -231,14 +233,11 @@ struct GenericLessonView: View {
                     
                     Text(showDetails ? "Hide Additional Info" : "Show Additional Info")
                         .bold()
-                        .foregroundColor(.primary)
                 }
                 .padding()
                 .frame(maxWidth: .infinity)
-                // Light brandOrange tint, not a full fill:
                 .background(brandOrange.opacity(0.1))
                 .cornerRadius(12)
-                .accessibilityLabel(showDetails ? "Hide additional info" : "Show additional info")
             }
             if showDetails {
                 VStack(alignment: .leading, spacing: 8) {
@@ -249,14 +248,10 @@ struct GenericLessonView: View {
                     ForEach(lesson.detailParagraphs, id: \.self) { detail in
                         Text(detail)
                             .font(.body)
-                            .accessibilityLabel(detail)
                     }
                 }
                 .padding()
-                .background(
-                    RoundedRectangle(cornerRadius: 12)
-                        .fill(Color.white)
-                )
+                .background(RoundedRectangle(cornerRadius: 12).fill(Color.white))
                 .overlay(
                     RoundedRectangle(cornerRadius: 12)
                         .stroke(brandOrange.opacity(0.1), lineWidth: 1)
@@ -266,129 +261,258 @@ struct GenericLessonView: View {
         }
     }
     
-    // 6) Quiz Section
+    // 6) Quiz
     private var quizSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("Quiz Time!")
-                .font(.title2)
-                .bold()
-            
-            Text(lesson.quizQuestion)
-                .font(.body)
-                .bold()
-            
-            VStack(spacing: 10) {
-                ForEach(lesson.quizOptions, id: \.self) { option in
-                    QuizOption(
-                        option: option,
-                        correctOption: lesson.correctAnswer,
-                        selectedOption: $selectedAnswer
-                    ) {
-                        if !viewModel.completedLessons.contains(lesson.id) && !viewModel.quizCompleted {
-                            viewModel.quizCompleted = true
-                            showQuizOverlay = true
-                            quizOverlayProgress = 50
-                            quizNextStep = "Try forming it in the lab!"
-                        }
+        VStack(alignment: .leading, spacing: 16) {
+            if !lesson.quizQuestions.isEmpty {
+                Text("Quiz Time!")
+                    .font(.title2)
+                    .bold()
+                    .foregroundColor(.orange)
+                
+                // Each question
+                ForEach(lesson.quizQuestions) { question in
+                    switch question.type {
+                    case .multipleChoice:
+                        multipleChoiceQuestion(question)
+                    case .trueFalse:
+                        trueFalseQuestion(question)
                     }
                 }
-            }
-            
-            if let answer = selectedAnswer {
-                let feedback = (answer == lesson.correctAnswer)
-                    ? "✅ Correct!"
-                    : "❌ Oops, that's not correct. Try again!"
-                Text(feedback)
-                    .foregroundColor(answer == lesson.correctAnswer ? .green : .red)
-                    .bold()
+                
+                // Buttons row: Submit / Try Again
+                HStack(spacing: 20) {
+                    Button(action: {
+                        withAnimation(.spring(response: 0.3, dampingFraction: 0.5)) {
+                            submitButtonScale = 1.2
+                        }
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+                            withAnimation {
+                                submitButtonScale = 1.0
+                            }
+                        }
+                        gradeQuiz()
+                    }) {
+                        Text("Submit Answers")
+                            .font(.headline)
+                            .foregroundColor(.white)
+                            .padding(.vertical, 10)
+                            .padding(.horizontal, 20)
+                            .background(quizSubmitted ? Color.gray : Color.orange)
+                            .cornerRadius(8)
+                            .scaleEffect(submitButtonScale)
+                    }
+                    .disabled(quizSubmitted)
+                    
+                    if quizSubmitted {
+                        Button("Try Again") {
+                            resetQuiz()
+                        }
+                        .font(.headline)
+                        .foregroundColor(.white)
+                        .padding(.vertical, 10)
+                        .padding(.horizontal, 20)
+                        .background(Color.orange)
+                        .cornerRadius(8)
+                    }
+                }
+                
+                // Display quiz score after the buttons
+                if let scoreText = quizScoreString {
+                    Text(scoreText)
+                        .font(.headline)
+                        .padding(.top, 8)
+                }
             }
         }
         .padding()
-        .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(Color.white)
-        )
+        .background(RoundedRectangle(cornerRadius: 12).fill(Color.white))
         .overlay(
             RoundedRectangle(cornerRadius: 12)
-                .stroke(brandOrange.opacity(0.15), lineWidth: 1)
+                .stroke(Color.orange.opacity(0.3), lineWidth: 1)
         )
     }
     
-    // 7) Guided Lesson CTA
     @ViewBuilder
     private var guidedLessonCTA: some View {
-        if let guidedTitle = lesson.guidedLessonTitle, let guidedHint = lesson.guidedLessonHint {
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack {
-                    NavigationLink(destination: {
-                        ContentView(guidedLearningMode: true)
-                            .environmentObject(viewModel)
-                            .onAppear {
-                                viewModel.guidedLearningMode = true
-                                viewModel.currentGuidedLessonModule = lesson
-                                viewModel.guidedOutcomeProducts = []
-                                viewModel.guidedPlaygroundCompleted = false
-                                viewModel.currentGuidedLesson = GuidedLesson(title: guidedTitle, hint: guidedHint)
-                            }
-                    }) {
-                        HStack {
-                            Image(systemName: "flask")
-                                .font(.title3)
-                                .accessibilityHidden(true)
-                            Text("Try forming it in the lab!")
-                                .font(.headline)
-                                .bold()
-                                .multilineTextAlignment(.leading)
+        if let guidedTitle = lesson.guidedLessonTitle,
+           let guidedHint = lesson.guidedLessonHint {
+            // HStack to center the button.
+            HStack {
+                Spacer()
+                
+                NavigationLink(destination: {
+                    ContentView(guidedLearningMode: true)
+                        .environmentObject(viewModel)
+                        .onAppear {
+                            viewModel.guidedLearningMode = true
+                            viewModel.currentGuidedLessonModule = lesson
+                            viewModel.guidedOutcomeProducts = []
+                            viewModel.guidedPlaygroundCompleted = false
+                            viewModel.currentGuidedLesson = GuidedLesson(title: guidedTitle, hint: guidedHint)
                         }
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 10)
-                        .background(brandOrange) // Keep the strong brand color for your CTA
-                        .foregroundColor(.white)
-                        .cornerRadius(12)
-                        .shadow(radius: 5)
-                        .accessibilityLabel("Try forming \(guidedTitle) in the lab.")
+                }) {
+                    HStack {
+                        Image(systemName: "flask")
+                            .font(.title3)
+                        if let reactionEquation = lesson.reactionEquation {
+                            Text("Try forming \(reactionEquation) in the lab!")
+                                .font(.headline)
+                            
+                                .bold()
+                        } else {
+                            Text("Try forming it in the lab!")
+                                .font(.title)
+                                .bold()
+                        }
                     }
+                    .frame(minWidth: 300, minHeight: 50)
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 10)
+                    .background(.purple)
+                    .foregroundColor(.white)
+                    .cornerRadius(20)
+                    .shadow(radius: 5)
                 }
-                .padding(.horizontal)
+                
+                Spacer()
             }
+            .padding(.horizontal)
         }
     }
+
+
 }
 
-// MARK: - QuizOption
-struct QuizOption: View {
-    let option: String
-    let correctOption: String
-    @Binding var selectedOption: String?
-    var markLessonComplete: (() -> Void)?
+// MARK: - Quiz Logic
+
+extension GenericLessonView {
     
-    var body: some View {
-        Button(action: {
-            selectedOption = option
-            if option == correctOption {
-                markLessonComplete?()
-            }
-        }) {
-            Text(option)
-                .font(.body)
-                .bold()
-                .padding()
-                .frame(maxWidth: .infinity)
-                .foregroundColor(selectedOption == option ? .white : .primary)
-                .background(buttonBackground)
-                .cornerRadius(12)
-                .accessibilityLabel("Answer option: \(option)")
+    /// Evaluate correctness for multiple choice and true/false questions
+    private func gradeQuiz() {
+        quizSubmitted = true
+        questionResults.removeAll()
+        
+        let mcTfQuestions = lesson.quizQuestions.filter {
+            $0.type == .multipleChoice || $0.type == .trueFalse
         }
-        .padding(.horizontal, 10)
+        
+        var correctCount = 0
+        
+        for q in mcTfQuestions {
+            let userAnswer = userAnswers[q.id]
+            let isCorrect = (userAnswer == q.correctChoice)
+            questionResults[q.id] = isCorrect
+            if isCorrect { correctCount += 1 }
+        }
+        
+        let totalCount = mcTfQuestions.count
+        quizScoreString = "You got \(correctCount) out of \(totalCount) correct. Press Try Again to retake."
+        
+        if correctCount == totalCount, totalCount > 0 {
+            if !viewModel.completedLessons.contains(lesson.id) && !viewModel.quizCompleted {
+                viewModel.quizCompleted = true
+                showQuizOverlay = true
+                quizOverlayProgress = 50
+                quizNextStep = "Try forming it in the lab!"
+            }
+        }
     }
     
-    // Unselected: light brand orange; correct: green; incorrect: red
-    private var buttonBackground: Color {
-        if let selected = selectedOption, selected == option {
-            return option == correctOption ? .green : .red
+    /// Reset quiz so user can re-attempt
+    private func resetQuiz() {
+        quizSubmitted = false
+        userAnswers.removeAll()
+        questionResults.removeAll()
+        quizScoreString = nil
+    }
+    
+    // MULTIPLE CHOICE
+    private func multipleChoiceQuestion(_ question: QuizQuestion) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(question.prompt)
+                .font(.headline)
+            
+            if let choices = question.choices {
+                ForEach(choices, id: \.self) { choice in
+                    Button(action: {
+                        userAnswers[question.id] = choice
+                    }) {
+                        HStack {
+                            Text(choice)
+                            Spacer()
+                        }
+                        .font(.body)
+                        .bold()
+                        .padding()
+                        .frame(maxWidth: .infinity)
+                        .foregroundColor(.primary)
+                        .background(buttonBackgroundForMC(question, choice: choice))
+                        .cornerRadius(12)
+                    }
+                    .disabled(quizSubmitted)
+                }
+            }
+        }
+        .padding()
+        .background(Color.gray.opacity(0.05).cornerRadius(8))
+    }
+    
+    private func buttonBackgroundForMC(_ question: QuizQuestion, choice: String) -> Color {
+        if !quizSubmitted {
+            return (userAnswers[question.id] == choice)
+                ? .orange.opacity(0.4)
+                : Color.gray.opacity(0.1)
         } else {
-            // A soft orange tint for unselected
-            return .orange.opacity(0.4)
+            let isCorrect = (choice == question.correctChoice)
+            let userAnswer = userAnswers[question.id]
+            if userAnswer == choice {
+                return isCorrect ? .green : .red
+            } else {
+                return Color.gray.opacity(0.1)
+            }
+        }
+    }
+    
+    // TRUE/FALSE
+    private func trueFalseQuestion(_ question: QuizQuestion) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(question.prompt)
+                .font(.headline)
+            
+            HStack(spacing: 20) {
+                tfOptionButton(question, option: "True")
+                tfOptionButton(question, option: "False")
+            }
+        }
+        .padding()
+        .background(Color.gray.opacity(0.05).cornerRadius(8))
+    }
+    
+    private func tfOptionButton(_ question: QuizQuestion, option: String) -> some View {
+        Button(option) {
+            userAnswers[question.id] = option
+        }
+        .font(.body)
+        .bold()
+        .padding()
+        .frame(minWidth: 80)
+        .foregroundColor(.primary)
+        .background(tfBackground(question, option: option))
+        .cornerRadius(12)
+        .disabled(quizSubmitted)
+    }
+    
+    private func tfBackground(_ question: QuizQuestion, option: String) -> Color {
+        if !quizSubmitted {
+            return (userAnswers[question.id] == option) ? .orange.opacity(0.4) : Color.gray.opacity(0.1)
+        } else {
+            let correctAnswer = question.correctChoice
+            if userAnswers[question.id] == option {
+                return option == correctAnswer ? .green : .red
+            } else {
+                return Color.gray.opacity(0.1)
+            }
         }
     }
 }
