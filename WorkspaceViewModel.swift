@@ -7,20 +7,20 @@ struct GuidedLesson {
     let hint: String
 }
 
-struct Element: Identifiable {
+struct Element: Identifiable,Equatable {
     let id = UUID()
     let symbol: String
     let name: String
     var color: Color = .blue
 }
 
-struct PlacedElement: Identifiable {
+struct PlacedElement: Identifiable, Equatable {
     let id = UUID()
     let element: Element
     var position: CGPoint
 }
 
-struct PlacedCompound: Identifiable {
+struct PlacedCompound: Identifiable,Equatable {
     let id = UUID()
     let compound: Compound
     var position: CGPoint

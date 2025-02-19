@@ -131,6 +131,12 @@ struct ContentView: View {
                 }
                 .transition(.opacity)
             }
+            
+            // Tutorial Overlay (only in PLAYGROUND mode)
+            if !guidedLearningMode && TutorialControllerHolder.shared.controller.currentStep != .finished {
+                TutorialOverlayView()
+                    .environmentObject(TutorialControllerHolder.shared.controller)
+            }
         }
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
@@ -162,7 +168,7 @@ struct ContentView: View {
         .toolbarBackground(.visible, for: .navigationBar)
         .toolbarColorScheme(.dark, for: .navigationBar)
         .onAppear {
-            // When a new guided lesson or playground is opened, clear the canvas.
+            // Clear the canvas when the playground or guided lesson is opened.
             viewModel.placedElements.removeAll()
             viewModel.placedCompounds.removeAll()
             viewModel.closeInfoPanel()
@@ -171,6 +177,13 @@ struct ContentView: View {
                 viewModel.currentGuidedLessonModule = nil
                 viewModel.guidedOutcomeProducts = []
                 viewModel.guidedPlaygroundCompleted = false
+            } else {
+                // In PLAYGROUND mode, auto-start the tutorial if not already dismissed.
+                if !UserDefaults.standard.bool(forKey: "hasSeenTutorial") {
+                    TutorialControllerHolder.shared.controller.startTutorial()
+                } else {
+                    TutorialControllerHolder.shared.controller.dismissTutorial()
+                }
             }
         }
         .onChange(of: viewModel.guidedPlaygroundCompleted) { completed in
@@ -186,3 +199,4 @@ struct ContentView: View {
         }
     }
 }
+

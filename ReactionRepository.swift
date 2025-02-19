@@ -29,7 +29,7 @@ struct BalancedReaction {
 
 
 /// A chemical compound with extra fields for the Info Panel.
-struct Compound: Identifiable {
+struct Compound: Identifiable, Equatable {
     let id = UUID()
     let formula: String
     let iupacName: String
@@ -249,8 +249,6 @@ final class ReactionRepository: ObservableObject {
             )
         )
         
-        // Add as many more as you like, using the same set of compounds or single atoms.
-        // ...
         
         balancedReactions = reactions
     }
