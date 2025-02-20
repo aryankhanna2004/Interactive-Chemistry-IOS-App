@@ -46,9 +46,9 @@ extension TutorialStep {
         case .welcome:
             return "Welcome to Playground! Start the tutorial."
         case .dragNA:
-            return "Drag 'Na' from the side panel onto the canvas."
+            return "Drag 'Na' from the highlighted side panel onto the canvas on the left."
         case .combineCL:
-            return "Now, drag 'Cl' and drop it onto 'Na' to combine them."
+            return "Now, drag 'Cl' and drop it onto 'Na' onto the canvas on the left to combine them."
         case .tapForInfo:
             return "Tap the newly formed compound to view its info."
         case .highlightInfo:
@@ -68,15 +68,14 @@ extension TutorialStep {
             return false
         }
     }
-    
+    @MainActor
     var spotlightRect: CGRect? {
         switch self {
-        case .dragNA:
-            // Highlight 'Na' button in side panel.
-            return CGRect(x: 735, y: 250, width: 100, height: 100)
-        case .combineCL:
-            // Highlight 'Cl' button in side panel.
-            return CGRect(x: 735, y: 335, width: 100, height: 100)
+        case .dragNA, .combineCL:
+            // Highlight the entire element panel.
+            let screenWidth = UIScreen.main.bounds.width
+            let screenHeight = UIScreen.main.bounds.height
+            return CGRect(x: screenWidth - 100, y: 0, width: 100, height: screenHeight)
         case .highlightInfo:
             // Updated coordinates for info panel.
             return CGRect(x: 90, y: 75, width: 260, height: 320)
@@ -124,8 +123,6 @@ struct SpotlightView: View {
     }
 }
 
-
-
 // MARK: - Tutorial Overlay View
 
 struct TutorialOverlayView: View {
@@ -149,7 +146,11 @@ struct TutorialOverlayView: View {
                 // Display spotlight if needed.
                 if tutorialController.currentStep.shouldShowSpotlight,
                    let rect = tutorialController.currentStep.spotlightRect {
-                    let shape: SpotlightShape = (tutorialController.currentStep == .highlightInfo) ? .rectangle : .circle
+                    let shape: SpotlightShape = (tutorialController.currentStep == .highlightInfo ||
+                                                 tutorialController.currentStep == .dragNA ||
+                                                 tutorialController.currentStep == .combineCL)
+                        ? .rectangle
+                        : .circle
                     SpotlightView(spotlightRect: rect, shape: shape)
                 } else {
                     Color.clear

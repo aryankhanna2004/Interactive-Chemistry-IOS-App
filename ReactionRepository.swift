@@ -131,15 +131,12 @@ final class ReactionRepository: ObservableObject {
         compoundDict["Cl"] = Compound(
             formula: "Cl",
             iupacName: "Chlorine",
-            commonName: "Chlorine Atom", // or "Chlorine Atom" if that's what you intend
+            commonName: "Chlorine Atom",
             reactionEquation: nil,
             commonUses: "Used in disinfectants and various chemical processes.",
             funFact: "Chlorine is a yellow-green gas at room temperature."
         )
 
-        
-        // We no longer define "NaOH + Cl" as a single compound (removed).
-        
         // Assign to our property
         compoundsByFormula = compoundDict
         

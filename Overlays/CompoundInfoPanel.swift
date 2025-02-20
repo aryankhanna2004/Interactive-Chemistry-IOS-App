@@ -13,6 +13,7 @@ struct CompoundInfoPanel: View {
             HStack {
                 Text("Compound Info")
                     .font(.headline)
+                    .foregroundColor(.black)
                 Spacer()
                 // Larger tap area for dismiss button.
                 Button(action: dismissAction) {
@@ -25,19 +26,31 @@ struct CompoundInfoPanel: View {
             }
             
             Text("**Formula**: \(compound.formula)")
+                .foregroundColor(.black)
+
             Text("**IUPAC Name**: \(compound.iupacName)")
+                .foregroundColor(.black)
+
             Text("**Common Name**: \(compound.commonName)")
+                .foregroundColor(.black)
+
             
             if let eq = compound.reactionEquation {
                 Text("**Reaction**: \(eq)")
+                    .foregroundColor(.black)
+
             }
             
             if let uses = compound.commonUses {
                 Text("**Common Uses**: \(uses)")
+                    .foregroundColor(.black)
+
             }
             
             if let fact = compound.funFact {
                 Text("**Fun Fact**: \(fact)")
+                    .foregroundColor(.black)
+
             }
         }
         .padding()
