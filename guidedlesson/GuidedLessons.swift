@@ -103,7 +103,7 @@ struct GenericLessonView: View {
                 }
                 .padding()
             }
-            .background(Color(.systemGroupedBackground))
+            .background(Color(UIColor.systemGroupedBackground))
             .navigationTitle("")
             .navigationBarTitleDisplayMode(.inline)
             .navigationBarBackButtonHidden(false)
@@ -153,7 +153,10 @@ extension GenericLessonView {
                 .font(.body)
         }
         .padding()
-        .background(RoundedRectangle(cornerRadius: 12).fill(Color.white))
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color(UIColor.systemBackground))
+        )
         .overlay(
             RoundedRectangle(cornerRadius: 12)
                 .stroke(brandOrange.opacity(0.15), lineWidth: 1)
@@ -174,7 +177,10 @@ extension GenericLessonView {
                 .foregroundColor(Color(hue: 0.65, saturation: 0.6, brightness: 0.75))
                 .padding(6)
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .background(RoundedRectangle(cornerRadius: 8).fill(Color.white))
+                .background(
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(Color(UIColor.systemBackground))
+                )
                 .overlay(
                     RoundedRectangle(cornerRadius: 8)
                         .stroke(brandOrange.opacity(0.15), lineWidth: 1)
@@ -182,7 +188,10 @@ extension GenericLessonView {
                 .shadow(color: .black.opacity(0.05), radius: 2)
         }
         .padding()
-        .background(RoundedRectangle(cornerRadius: 12).fill(Color.white))
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color(UIColor.systemBackground))
+        )
         .overlay(
             RoundedRectangle(cornerRadius: 12)
                 .stroke(brandOrange.opacity(0.1), lineWidth: 1)
@@ -203,7 +212,10 @@ extension GenericLessonView {
                     Text(paragraph)
                         .font(.body)
                         .padding(8)
-                        .background(RoundedRectangle(cornerRadius: 8).fill(Color.white))
+                        .background(
+                            RoundedRectangle(cornerRadius: 8)
+                                .fill(Color(UIColor.systemBackground))
+                        )
                         .overlay(
                             RoundedRectangle(cornerRadius: 8)
                                 .stroke(brandOrange.opacity(0.1), lineWidth: 1)
@@ -211,7 +223,10 @@ extension GenericLessonView {
                 }
             }
             .padding()
-            .background(RoundedRectangle(cornerRadius: 12).fill(Color.white))
+            .background(
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(Color(UIColor.systemBackground))
+            )
             .overlay(
                 RoundedRectangle(cornerRadius: 12)
                     .stroke(brandOrange.opacity(0.1), lineWidth: 1)
@@ -251,7 +266,10 @@ extension GenericLessonView {
                     }
                 }
                 .padding()
-                .background(RoundedRectangle(cornerRadius: 12).fill(Color.white))
+                .background(
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(Color(UIColor.systemBackground))
+                )
                 .overlay(
                     RoundedRectangle(cornerRadius: 12)
                         .stroke(brandOrange.opacity(0.1), lineWidth: 1)
@@ -261,7 +279,7 @@ extension GenericLessonView {
         }
     }
     
-    // 6) Quiz
+    // 6) Quiz Section
     private var quizSection: some View {
         VStack(alignment: .leading, spacing: 16) {
             if !lesson.quizQuestions.isEmpty {
@@ -326,7 +344,10 @@ extension GenericLessonView {
             }
         }
         .padding()
-        .background(RoundedRectangle(cornerRadius: 12).fill(Color.white))
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color(UIColor.systemBackground))
+        )
         .overlay(
             RoundedRectangle(cornerRadius: 12)
                 .stroke(Color.orange.opacity(0.3), lineWidth: 1)
@@ -358,7 +379,6 @@ extension GenericLessonView {
                         if let reactionEquation = lesson.reactionEquation {
                             Text("Try forming \(reactionEquation) in the lab!")
                                 .font(.headline)
-                            
                                 .bold()
                         } else {
                             Text("Try forming it in the lab!")
@@ -369,7 +389,7 @@ extension GenericLessonView {
                     .frame(minWidth: 300, minHeight: 50)
                     .padding(.horizontal, 16)
                     .padding(.vertical, 10)
-                    .background(.purple)
+                    .background(Color.purple)
                     .foregroundColor(.white)
                     .cornerRadius(20)
                     .shadow(radius: 5)
@@ -380,8 +400,6 @@ extension GenericLessonView {
             .padding(.horizontal)
         }
     }
-
-
 }
 
 // MARK: - Quiz Logic
@@ -398,7 +416,6 @@ extension GenericLessonView {
         }
         
         var correctCount = 0
-        
         for q in mcTfQuestions {
             let userAnswer = userAnswers[q.id]
             let isCorrect = (userAnswer == q.correctChoice)
@@ -409,16 +426,21 @@ extension GenericLessonView {
         let totalCount = mcTfQuestions.count
         quizScoreString = "You got \(correctCount) out of \(totalCount) correct. Press Try Again to retake."
         
+        // If quiz is fully correct and the lesson isn’t already fully complete...
         if correctCount == totalCount, totalCount > 0 {
-            if !viewModel.completedLessons.contains(lesson.id) && !viewModel.quizCompleted {
-                viewModel.quizCompleted = true
-                showQuizOverlay = true
-                quizOverlayProgress = 50
-                quizNextStep = "Try forming it in the lab!"
+            DispatchQueue.main.async {
+                // Only update to 50% if not already 100%
+                if (self.viewModel.lessonProgress[self.lesson.id] ?? 0.0) < 1.0 {
+                    self.viewModel.lessonProgress[self.lesson.id] = 0.5
+                }
+                self.viewModel.quizCompleted = true
+                self.showQuizOverlay = true
+                self.quizOverlayProgress = 50
+                self.quizNextStep = "Try forming it in the lab!"
             }
         }
     }
-    
+
     /// Reset quiz so user can re-attempt
     private func resetQuiz() {
         quizSubmitted = false

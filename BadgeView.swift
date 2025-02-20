@@ -26,6 +26,7 @@ struct BadgeView: View {
                     .font(.system(.largeTitle, design: .rounded))
                     .fontWeight(.heavy)
                     .padding(.top, 32)
+                    .foregroundColor(.primary)
                 
                 // Partition badges into unlocked vs locked
                 let unlockedBadges = possibleBadges.filter { badges.contains($0.title) }
@@ -52,7 +53,7 @@ struct BadgeView: View {
             }
             .padding(.horizontal)
         }
-        // Light background behind the scroll view
+        // Use a system grouped background for dark mode compatibility.
         .background(Color(UIColor.systemGroupedBackground).edgesIgnoringSafeArea(.all))
     }
 }
@@ -85,17 +86,16 @@ struct UnlockedBadgesSection: View {
                     Spacer()
                 }
                 .padding()
-                .background(
-                    RoundedRectangle(cornerRadius: 12)
-                        .fill(Color.white)
-                )
+                // Use systemBackground to adapt to light/dark modes.
+                .background(RoundedRectangle(cornerRadius: 12).fill(Color(UIColor.systemBackground)))
                 .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
             }
         }
         .padding()
+        // Wrap section in a translucent white container for consistency.
         .background(
             RoundedRectangle(cornerRadius: 16)
-                .fill(Color.white.opacity(0.2)) // Subtle background for the entire section
+                .fill(Color(UIColor.systemBackground).opacity(0.9))
         )
     }
 }
@@ -130,7 +130,7 @@ struct LockedBadgesSection: View {
                 .padding()
                 .background(
                     RoundedRectangle(cornerRadius: 12)
-                        .fill(Color(.systemGray6))
+                        .fill(Color(UIColor.secondarySystemBackground))
                 )
                 .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
             }
@@ -138,7 +138,7 @@ struct LockedBadgesSection: View {
         .padding()
         .background(
             RoundedRectangle(cornerRadius: 16)
-                .fill(Color.white.opacity(0.2))
+                .fill(Color(UIColor.systemBackground).opacity(0.9))
         )
     }
 }

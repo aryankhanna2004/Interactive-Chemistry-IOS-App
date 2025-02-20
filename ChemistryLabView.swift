@@ -78,24 +78,19 @@ struct ChemistryLabHomeView: View {
                             }
                         }
                         
-                        // Dashboard Button
-                        Button {
-                            showDashboard = true
-                        } label: {
-                            Label("Dashboard", systemImage: "chart.bar.fill")
-                                .font(.title2)
-                                .padding()
-                                .frame(width: 250)
-                                .background(Color.orange)
-                                .foregroundColor(.white)
-                                .cornerRadius(10)
-                                .shadow(radius: 4)
-                        }
-                        .sheet(isPresented: $showDashboard) {
-                            DashboardView(allLessons: lessonModules)
-                                .environmentObject(viewModel)
-                        }
-                        
+                        // Dashboard Button as NavigationLink instead of sheet.
+                               NavigationLink(destination: DashboardView(allLessons: lessonModules)
+                                               .environmentObject(viewModel)) {
+                                   Label("Dashboard", systemImage: "chart.bar.fill")
+                                       .font(.title2)
+                                       .padding()
+                                       .frame(width: 250)
+                                       .background(Color.orange)
+                                       .foregroundColor(.white)
+                                       .cornerRadius(10)
+                                       .shadow(radius: 4)
+                               }
+
                         // Badges Button
                         Button {
                             showBadges = true

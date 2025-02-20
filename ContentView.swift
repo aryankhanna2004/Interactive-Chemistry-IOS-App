@@ -12,7 +12,8 @@ struct ContentView: View {
     @State private var showCompletionOverlay = false
     @State private var overlayProgress: Double = 0
     @State private var overlayNextStep: String? = nil
-    
+    @State private var hasShownCompletionOverlay = false
+
     var body: some View {
         ZStack {
             // Main lab layout: Canvas + ElementSelectionPanel.
@@ -106,15 +107,19 @@ struct ContentView: View {
             }
             
             // Final guided completion overlay.
-            if guidedLearningMode && showCompletionOverlay {
+            if guidedLearningMode && showCompletionOverlay && !hasShownCompletionOverlay {
                 LessonProgressOverlay(
                     lessonName: viewModel.currentGuidedLessonModule?.title ?? "Lesson",
                     currentProgress: overlayProgress,
                     nextStep: overlayNextStep
                 ) {
-                    withAnimation { showCompletionOverlay = false }
+                    withAnimation {
+                        showCompletionOverlay = false
+                        hasShownCompletionOverlay = true
+                    }
                 }
             }
+
             
             // Optional: Reaction hint overlay.
             if let hint = viewModel.reactionHint {
@@ -190,9 +195,11 @@ struct ContentView: View {
             if completed && viewModel.newlyDiscoveredCompound == nil {
                 overlayProgress = 100
                 overlayNextStep = nil
-                if let lessonModule = viewModel.currentGuidedLessonModule,
-                   !viewModel.completedLessons.contains(lessonModule.id) {
-                    viewModel.completedLessons.insert(lessonModule.id)
+                if let lessonModule = viewModel.currentGuidedLessonModule {
+                    DispatchQueue.main.async {
+                        // Set lesson progress to 100% when lab is completed
+                        self.viewModel.lessonProgress[lessonModule.id] = 1.0
+                    }
                 }
                 showCompletionOverlay = true
             }

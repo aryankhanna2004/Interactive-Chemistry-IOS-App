@@ -128,6 +128,15 @@ final class ReactionRepository: ObservableObject {
             commonUses: "Digestive acid in stomach, many industrial uses.",
             funFact: "The stomach secretes HCl to help break down food."
         )
+        compoundDict["Cl"] = Compound(
+            formula: "Cl",
+            iupacName: "Chlorine",
+            commonName: "Chlorine Atom", // or "Chlorine Atom" if that's what you intend
+            reactionEquation: nil,
+            commonUses: "Used in disinfectants and various chemical processes.",
+            funFact: "Chlorine is a yellow-green gas at room temperature."
+        )
+
         
         // We no longer define "NaOH + Cl" as a single compound (removed).
         

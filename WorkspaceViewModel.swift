@@ -59,6 +59,7 @@ class WorkspaceViewModel: ObservableObject {
     @Published var guidedLearningMode: Bool = false
     @Published var currentGuidedLesson: GuidedLesson? = nil
     @Published var completedLessons: Set<UUID> = []
+    @Published var lessonProgress: [UUID: Double] = [:]
     
     // NEW: A recommendation hint to help the user.
     @Published var reactionHint: String? = nil
@@ -111,13 +112,23 @@ class WorkspaceViewModel: ObservableObject {
                     }
                     clusterConsumedIDs.formUnion(instanceConsumedIDs)
                     
+                    // Calculate the total number of product instances
+                    let totalProducts = reaction.products.reduce(0) { $0 + $1.value }
+                    var globalIndex = 0
+
                     for (productFormula, productCount) in reaction.products {
                         guard let productCompound = ReactionRepository.shared.compoundsByFormula[productFormula] else { continue }
                         
-                        let angleIncrement = 360.0 / CGFloat(productCount)
-                        for i in 0..<productCount {
-                            let angle = angleIncrement * CGFloat(i)
-                            let offsetRadius: CGFloat = 20
+                        // Process each instance of the product
+                        for _ in 0..<productCount {
+                            // Use the global index and total count to calculate spacing
+                            let angleIncrement = 360.0 / CGFloat(totalProducts)
+                            let baseRadius: CGFloat = 20
+                            // Using globalIndex to add incremental spacing for each product instance
+                            let extraSpacing: CGFloat = 5 * CGFloat(globalIndex)
+                            let offsetRadius = baseRadius + extraSpacing
+                            
+                            let angle = angleIncrement * CGFloat(globalIndex)
                             let dx = offsetRadius * cos(angle * .pi / 180)
                             let dy = offsetRadius * sin(angle * .pi / 180)
                             
@@ -126,6 +137,7 @@ class WorkspaceViewModel: ObservableObject {
                                 position: CGPoint(x: centerX + dx, y: centerY + dy),
                                 constituentElements: []
                             )
+                            
                             withAnimation {
                                 placedCompounds.append(newCompound)
                             }
@@ -135,10 +147,11 @@ class WorkspaceViewModel: ObservableObject {
                             reactionHistory.append(productCompound)
                             playReactionSoundAndHaptics()
                             
-                            // Guided learning outcome check.
+                            // Guided learning outcome check (only if lesson is not yet 100% complete)
                             if guidedLearningMode,
                                let lessonModule = currentGuidedLessonModule,
-                               let outcomeGoals = lessonModule.guidedOutcomeGoals {
+                               let outcomeGoals = lessonModule.guidedOutcomeGoals,
+                               guidedPlaygroundCompleted == false {
                                 if outcomeGoals.contains(productCompound.formula) {
                                     guidedOutcomeProducts.insert(productCompound.formula)
                                     if guidedOutcomeProducts.count >= outcomeGoals.count {
@@ -148,8 +161,13 @@ class WorkspaceViewModel: ObservableObject {
                             } else {
                                 checkBadges(for: productCompound)
                             }
+                            
+                            globalIndex += 1
                         }
                     }
+
+
+
                 }
                 
                 for (symbol, neededCount) in reaction.reactants {

@@ -247,7 +247,7 @@ struct LessonsListView: View {
                     
                     Text("Explore guided lessons on chemical reactions and deepen your understanding of chemistry.")
                         .font(.subheadline)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(.primary.opacity(0.9))
                     
                     LazyVStack(spacing: 24) {
                         ForEach(lessonModules) { module in
@@ -287,7 +287,7 @@ extension LessonsListView {
                     Text(module.title)
                         .font(.headline)
                         .bold()
-                        .foregroundColor(.primary)
+                        .foregroundColor(.black)
                     
                     Text(module.description)
                         .font(.subheadline)
