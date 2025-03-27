@@ -12,6 +12,10 @@ Interactive Chemistry Lab addresses the challenge of making abstract chemical co
 - Understand reaction mechanisms through visual feedback
 - Track progress and earn achievements through a badge system
 
+
+https://github.com/user-attachments/assets/bf1c1d58-f4bb-4d9a-91c1-5d3e258757a6
+
+
 ### Key Features
 
 1. **Interactive Workspace**: A dynamic canvas where users can drag, combine, and manipulate chemical elements.
@@ -144,3 +148,6 @@ Key Component Interactions:
 5. TutorialManager guides new users through basic interactions
 6. Overlays provide real-time feedback on discoveries and achievements
 7. BadgeView tracks and displays user progress
+
+https://github.com/user-attachments/assets/2000d06f-fcd2-48c2-b59d-0da044bcac01
+
