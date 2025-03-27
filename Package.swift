@@ -8,13 +8,13 @@ import PackageDescription
 import AppleProductTypes
 
 let package = Package(
-    name: "Interactive  Chemistry",
+    name: "Interactive Chemistry",
     platforms: [
         .iOS("16.0")
     ],
     products: [
         .iOSApplication(
-            name: "Interactive  Chemistry",
+            name: "Interactive Chemistry",
             targets: ["AppModule"],
             bundleIdentifier: "aryan.chem2",
             teamIdentifier: "C5A4Q7BH32",

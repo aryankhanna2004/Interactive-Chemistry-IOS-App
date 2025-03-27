@@ -184,7 +184,7 @@ struct ContentView: View {
                 viewModel.guidedPlaygroundCompleted = false
             } else {
                 // In PLAYGROUND mode, auto-start the tutorial if not already dismissed.
-                if !UserDefaults.standard.bool(forKey: "hasSeenTutorial") {
+                if !UserDefaults.standard.bool(forKey: "hasSeenTutorial122") {
                     TutorialControllerHolder.shared.controller.startTutorial()
                 } else {
                     TutorialControllerHolder.shared.controller.dismissTutorial()

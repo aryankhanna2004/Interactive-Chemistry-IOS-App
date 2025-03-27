@@ -21,7 +21,7 @@ final class TutorialController: ObservableObject {
     
     func dismissTutorial() {
         currentStep = .none
-        UserDefaults.standard.set(true, forKey: "hasSeenTutorial3")
+        UserDefaults.standard.set(true, forKey: "hasSeenTutorial122")
     }
 }
 
@@ -195,7 +195,7 @@ struct TutorialOverlayView: View {
             HStack(spacing: 30) {
                 Button("Skip") {
                     if doNotShowAgain {
-                        UserDefaults.standard.set(true, forKey: "hasSeenTutorial")
+                        UserDefaults.standard.set(true, forKey: "hasSeenTutorial122")
                     }
                     tutorialController.dismissTutorial()
                 }
@@ -208,7 +208,7 @@ struct TutorialOverlayView: View {
                 
                 Button("Start") {
                     if doNotShowAgain {
-                        UserDefaults.standard.set(true, forKey: "hasSeenTutorial")
+                        UserDefaults.standard.set(true, forKey: "hasSeenTutorial122")
                     }
                     tutorialController.nextStep()
                 }
